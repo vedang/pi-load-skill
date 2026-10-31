@@ -58,7 +58,7 @@ describe("manual command boundary", () => {
       await h.run();
       expect(h.notify).toHaveBeenCalledWith(
         expect.stringContaining("specific_skills"),
-        "error",
+        Object.keys(config).length ? "warning" : "error",
       );
       expect(h.ui.custom).not.toHaveBeenCalled();
       expect(h.sendMessage).not.toHaveBeenCalled();

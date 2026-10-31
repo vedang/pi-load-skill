@@ -1,18 +1,12 @@
-import {
-  accessSync,
-  constants,
-  readFileSync,
-  realpathSync,
-  statSync,
-} from "node:fs";
-import { homedir } from "node:os";
-import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+import { accessSync, constants, realpathSync, statSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
 import {
   DefaultPackageManager,
   loadSkillsFromDir,
   SettingsManager,
   type Skill,
 } from "@earendil-works/pi-coding-agent";
+import { readConfig } from "./config.js";
 
 interface Catalog {
   skills: Skill[];
@@ -21,61 +15,8 @@ interface Catalog {
 
 /** Invocation-local only. Pi owns all skill parsing, validation, and traversal. */
 export async function readCatalog(agentDir: string): Promise<Catalog> {
-  const settingsPath = join(agentDir, "settings.json");
-  const setup = `Add a nonempty specific_skills array of local directories or specific_packages array of installed package sources to ${settingsPath}.`;
-  let settings: unknown;
-  try {
-    settings = JSON.parse(readFileSync(settingsPath, "utf8"));
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      throw new Error(setup);
-    }
-    throw new Error(
-      `Cannot read settings at ${settingsPath}: ${String(error)}`,
-    );
-  }
-  if (!settings || typeof settings !== "object" || Array.isArray(settings)) {
-    throw new Error(`Settings at ${settingsPath} must be a JSON object.`);
-  }
-  const readSources = (
-    key: "specific_skills" | "specific_packages",
-  ): string[] => {
-    const value = (settings as Record<string, unknown>)[key];
-    if (value === undefined) return [];
-    if (
-      !Array.isArray(value) ||
-      value.some((entry) => typeof entry !== "string" || !entry.trim())
-    ) {
-      throw new Error(
-        `${key} in ${settingsPath} must be an array of nonempty strings.`,
-      );
-    }
-    return (value as string[]).map((entry) => entry.trim());
-  };
-  const paths = readSources("specific_skills");
-  const packages = readSources("specific_packages");
-  if (paths.length === 0 && packages.length === 0) throw new Error(setup);
-  const roots = paths.map((entry) => {
-    const path = entry.trim();
-    if (
-      (!isAbsolute(path) && /^[a-z][a-z\d+.-]*:/i.test(path)) ||
-      (path.startsWith("~") && path !== "~" && !path.startsWith("~/"))
-    ) {
-      throw new Error(
-        `Not a local directory path: ${path}. Use an absolute path, ~/path, or a path relative to the agent directory.`,
-      );
-    }
-    return resolve(
-      agentDir,
-      path === "~"
-        ? homedir()
-        : path.startsWith("~/")
-          ? join(homedir(), path.slice(2))
-          : path,
-    );
-  });
-
-  const catalog: Catalog = { skills: [], diagnostics: [] };
+  const { roots, packages, diagnostics } = readConfig(agentDir);
+  const catalog: Catalog = { skills: [], diagnostics };
   const seen = new Set<string>();
   const discover = (dir: string, selectedFile?: string) => {
     try {

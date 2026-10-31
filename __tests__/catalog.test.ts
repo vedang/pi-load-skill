@@ -20,7 +20,10 @@ afterEach(() => {
 });
 
 function settings(value: unknown) {
-  writeFileSync(join(agentDir, "settings.json"), JSON.stringify(value));
+  writeFileSync(
+    join(agentDir, "settings.json"),
+    JSON.stringify({ load_specific_skills: value }),
+  );
 }
 function skill(
   root: string,
@@ -130,8 +133,6 @@ describe("private catalog configuration and native discovery", () => {
   );
 
   it.each([
-    null,
-    [],
     { specific_skills: "skills" },
     { specific_skills: [""] },
     { specific_skills: [42] },
@@ -139,14 +140,22 @@ describe("private catalog configuration and native discovery", () => {
     { specific_packages: "git:github.com/example/skills" },
     { specific_packages: [""] },
     { specific_packages: [42] },
-  ])("rejects invalid configuration: %j", async (config) => {
-    settings(config);
-    await expect(readCatalog(agentDir)).rejects.toThrow();
-  });
+  ])(
+    "diagnoses an invalid source without discarding healthy sources: %j",
+    async (config) => {
+      const valid = skill(join(agentDir, "healthy/skills"), "one");
+      settings({ ...config, specific_packages: ["healthy"] });
+      if ("specific_packages" in config)
+        settings({ ...config, specific_skills: ["healthy/skills"] });
+      const result = await readCatalog(agentDir);
+      expect(result.skills.map((s) => s.filePath)).toEqual([valid]);
+      expect(result.diagnostics.length).toBeGreaterThan(0);
+    },
+  );
 
   it("reports missing settings and invalid JSON without silently falling back", async () => {
     await expect(readCatalog(agentDir)).rejects.toThrow(
-      /Add a nonempty specific_skills/,
+      /Add load_specific_skills/,
     );
     writeFileSync(join(agentDir, "settings.json"), "{broken");
     await expect(readCatalog(agentDir)).rejects.toThrow(/Cannot read settings/);

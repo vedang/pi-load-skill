@@ -123,7 +123,10 @@ export function createHarness() {
     registerMessageRenderer,
     writeSkill,
     configure(value: unknown = { specific_skills: ["catalog"] }) {
-      writeFileSync(join(agentDir, "settings.json"), JSON.stringify(value));
+      writeFileSync(
+        join(agentDir, "settings.json"),
+        JSON.stringify({ load_specific_skills: value }),
+      );
     },
     run(query = "") {
       if (!handler) throw new Error("Command not registered");

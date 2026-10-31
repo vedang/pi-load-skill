@@ -30,21 +30,23 @@ pi -e ./src/index.ts
 
 ## Configure the private catalog
 
-Merge either or both of the following keys into the user-level `settings.json`
+Merge the following section (all sources are optional) into the user-level `settings.json`
 inside Pi's agent directory (normally `~/.pi/agent`; respects Pi's
 `PI_CODING_AGENT_DIR` override). Do not replace unrelated settings:
 
 ```json
 {
-  "specific_skills": [
-    "~/src/private-skills"
-  ],
-  "specific_packages": [
-    "git:github.com/your-org/private-skill-package",
-    "~/src/another-local-package"
-  ]
+  "load_specific_skills": {
+    "specific_skills": ["~/src/private-skills"],
+    "specific_packages": ["~/src/another-local-package"],
+    "hermes_agent_skills": "~/src/hermes-agent"
+  }
 }
 ```
+
+**Breaking configuration change:** top-level `specific_skills` and
+`specific_packages` are no longer read. Move them inside `load_specific_skills`;
+obsolete keys produce diagnostics, not migration or fallback.
 
 - `specific_skills`: local directory paths. Pi discovers skills under each root.
   Remote/package source strings are not accepted in this list.
