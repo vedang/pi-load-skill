@@ -152,12 +152,12 @@ describe("manual command boundary", () => {
     );
   });
 
-  it.each([false, true])(
+  it.each(["none", "first", "both"])(
     "preserves hidden checks, orders the batch, and appends nothing if any file fails (%s)",
-    async (deleteFirst) => {
+    async (failure) => {
       h.configure();
       const first = h.writeSkill("a", "alpha", "ALPHA BODY");
-      h.writeSkill("b", "beta", "BETA BODY");
+      const second = h.writeSkill("b", "beta", "BETA BODY");
       const { component, completion } = await h.open();
       component.handleInput?.("\r"); // zero checks is a no-op, even with a highlight
       expect(h.sendMessage).not.toHaveBeenCalled();
@@ -168,11 +168,22 @@ describe("manual command boundary", () => {
         "1 checked (1 hidden)",
       );
       component.handleInput?.("\t");
-      if (deleteFirst) rmSync(first);
+      if (failure !== "none") rmSync(first);
+      if (failure === "both") rmSync(second);
       component.handleInput?.("\r");
       await completion;
-      if (deleteFirst) expect(h.sendMessage).not.toHaveBeenCalled();
-      else {
+      if (failure !== "none") {
+        expect(h.sendMessage).not.toHaveBeenCalled();
+        expect(h.notify).toHaveBeenCalledWith(
+          expect.stringContaining("alpha ("),
+          "error",
+        );
+        if (failure === "both")
+          expect(h.notify).toHaveBeenCalledWith(
+            expect.stringContaining("beta ("),
+            "error",
+          );
+      } else {
         expect(h.sendMessage).toHaveBeenCalledOnce();
         const [message, options] = h.sendMessage.mock.calls[0];
         expect(

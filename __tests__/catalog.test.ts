@@ -153,6 +153,34 @@ describe("private catalog configuration and native discovery", () => {
     },
   );
 
+  it("ignores obsolete top-level sources with actionable diagnostics and isolates malformed Hermes settings", async () => {
+    skill(join(agentDir, "obsolete"), "must-not-load");
+    const healthy = skill(join(agentDir, "healthy"), "current");
+    writeFileSync(
+      join(agentDir, "settings.json"),
+      JSON.stringify({
+        specific_skills: ["obsolete"],
+        specific_packages: ["obsolete"],
+        load_specific_skills: {
+          specific_skills: ["healthy"],
+          hermes_agent_skills: "https://example.invalid/repo.git",
+        },
+      }),
+    );
+    const catalog = await readCatalog(agentDir);
+    expect(catalog.skills.map((entry) => entry.filePath)).toEqual([healthy]);
+    expect(catalog.diagnostics.join("\n")).toContain(
+      "move it into load_specific_skills.specific_skills",
+    );
+    expect(catalog.diagnostics.join("\n")).toContain(
+      "move it into load_specific_skills.specific_packages",
+    );
+    expect(catalog.diagnostics.join("\n")).toContain("hermes_agent_skills");
+    expect(catalog.diagnostics.join("\n")).toContain(
+      "Not a local directory path",
+    );
+  });
+
   it("reports missing settings and invalid JSON without silently falling back", async () => {
     await expect(readCatalog(agentDir)).rejects.toThrow(
       /Add load_specific_skills/,

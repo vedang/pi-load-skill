@@ -28,7 +28,7 @@ export function showSkillPicker(
       let detailLineCount = 0;
       let closed = false;
       const clean = (text: string) =>
-        stripTerminalSequences(text).replaceAll("\r", "");
+        stripTerminalSequences(text).replace(/[\r\n\t]/g, " ");
       const selected = () => matches[index];
       const finish = (value: CatalogEntry[] | undefined) => {
         if (!closed) {

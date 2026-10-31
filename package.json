@@ -5,7 +5,8 @@
   "description": "Explicit, on-demand loading of private local skills in Pi.",
   "type": "module",
   "files": [
-    "src"
+    "src",
+    "resources/hermes-catalog.json"
   ],
   "keywords": [
     "pi-package",

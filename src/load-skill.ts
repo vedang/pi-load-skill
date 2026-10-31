@@ -14,7 +14,19 @@ import type { CatalogEntry } from "./catalog.js";
 
 /** Synchronous so the caller can recheck idle and deliver without yielding. */
 export function prepareSkillMessage(selected: CatalogEntry[]) {
-  const prepared = selected.map(prepareOne);
+  const prepared: ReturnType<typeof prepareOne>[] = [];
+  const failures: string[] = [];
+  for (const entry of selected) {
+    try {
+      prepared.push(prepareOne(entry));
+    } catch (error) {
+      failures.push(`${entry.name} (${entry.filePath}): ${String(error)}`);
+    }
+  }
+  if (failures.length)
+    throw new Error(
+      `Batch preparation failed; nothing loaded.\n${failures.join("\n")}`,
+    );
   return {
     message: {
       customType: "pi-load-skill",

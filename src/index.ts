@@ -18,7 +18,7 @@ export default function loadSkillExtension(pi: ExtensionAPI): void {
   }>("pi-load-skill", (message, options, theme) => {
     const skills = message.details?.skills ?? [];
     const clean = (text: string) =>
-      stripTerminalSequences(text).replaceAll("\r", "");
+      stripTerminalSequences(text).replace(/[\r\n\t]/g, " ");
     const name = truncateToWidth(
       clean(
         `Loaded ${skills.length} skills: ${skills.map((skill) => skill.name).join(", ")}`,
@@ -86,7 +86,7 @@ export default function loadSkillExtension(pi: ExtensionAPI): void {
           catalog.skills,
           args.trim(),
         );
-        if (!selected) return;
+        if (!selected?.length) return;
         const prepared = prepareSkillMessage(selected);
         for (const diagnostic of prepared.diagnostics)
           ctx.ui.notify(diagnostic, "warning");
