@@ -1,6 +1,10 @@
 import { accessSync, constants, readFileSync, statSync } from "node:fs";
 import { basename, resolve } from "node:path";
-import { loadSkillsFromDir, type Skill, stripFrontmatter } from "@earendil-works/pi-coding-agent";
+import {
+  loadSkillsFromDir,
+  type Skill,
+  stripFrontmatter,
+} from "@earendil-works/pi-coding-agent";
 
 /** Synchronous so the caller can recheck idle and deliver without yielding. */
 export function prepareSkillMessage(selected: Skill) {
@@ -9,13 +13,18 @@ export function prepareSkillMessage(selected: Skill) {
   }
   // Fail on deletion before invoking native discovery, which could otherwise
   // recurse into bundled directories when the selected SKILL.md disappears.
-  if (!statSync(selected.filePath).isFile()) throw new Error(`Not a skill file: ${selected.filePath}`);
+  if (!statSync(selected.filePath).isFile())
+    throw new Error(`Not a skill file: ${selected.filePath}`);
   accessSync(selected.filePath, constants.R_OK);
   const result = loadSkillsFromDir({ dir: selected.baseDir, source: "path" });
-  const skill = result.skills.find((entry) => resolve(entry.filePath) === resolve(selected.filePath));
+  const skill = result.skills.find(
+    (entry) => resolve(entry.filePath) === resolve(selected.filePath),
+  );
   if (!skill) {
     const reason = result.diagnostics.map((item) => item.message).join("; ");
-    throw new Error(`Selected skill is no longer loadable: ${selected.filePath}${reason ? ` (${reason})` : ""}. Reopen /load-skill.`);
+    throw new Error(
+      `Selected skill is no longer loadable: ${selected.filePath}${reason ? ` (${reason})` : ""}. Reopen /load-skill.`,
+    );
   }
   const body = stripFrontmatter(readFileSync(skill.filePath, "utf8"));
   return {
@@ -25,10 +34,16 @@ export function prepareSkillMessage(selected: Skill) {
       display: true,
       details: { name: skill.name, filePath: skill.filePath },
     },
-    diagnostics: result.diagnostics.map((item) => `${item.path}: ${item.message}`),
+    diagnostics: result.diagnostics.map(
+      (item) => `${item.path}: ${item.message}`,
+    ),
   };
 }
 
 function escapeAttribute(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }

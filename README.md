@@ -52,7 +52,8 @@ keybindings are respected and shown in the picker help. The picker
 uses Pi's temporary custom UI, preserving the editor draft present when it opens.
 Only interactive TUI mode with UI available is supported, and the agent must be
 idle. RPC receives an unsupported-mode notification; without UI, Pi receives a
-command error, not arbitrary stdout or a conversation message.
+command error through the host (stderr in Pi 0.84.2 print/JSON modes), not arbitrary
+stdout or a conversation message.
 
 Loading adds one custom context message and a compact `Loaded skill: …` transcript
 entry. It does **not** start a model turn. Write your next prompt to apply it.
@@ -104,6 +105,10 @@ make check
 make test
 ```
 
+The unit suite covers catalog configuration/native discovery and picker
+interaction. The integration suite drives the real command and picker against
+local files, and starts a real isolated Pi process to smoke-test package loading,
+absence of catalog reads/advertisement, and absence of model-callable tools.
 The suites are deterministic and need no model credentials or network requests.
 The project explicitly denies the inspected `@google/genai` no-op preinstall
 and `protobufjs` version-warning postinstall scripts in `pnpm-workspace.yaml`;
@@ -111,3 +116,31 @@ neither builds runtime artifacts needed here. If pnpm asks about new dependency
 build scripts, review them explicitly; this extension does not approve scripts
 on your behalf. Never bypass a harness block
 with a different package manager or lower-level executable.
+
+### Manual terminal acceptance
+
+Run these checks in both modes, with a trusted acyclic catalog configured:
+
+```sh
+pi -e ./src/index.ts --tui-mode regular
+pi -e ./src/index.ts --tui-mode fullscreen
+```
+
+- Open `/load-skill stripe`; verify even an exact match waits for confirmation.
+- Search, navigate, and cancel. Confirm that no transcript message or model
+  response was produced. The editor draft present when the custom UI opens must
+  be restored on both cancellation and confirmation; command submission itself
+  still follows Pi's normal editor behavior.
+- Confirm a skill: one compact transcript entry appears, with no model response.
+  Send a separate prompt to apply it.
+- Check same-name skills, no matches, Unicode/IME input, long-description paging,
+  terminal resizing, and narrow widths. At very short terminal heights, the
+  picker reduces to input, selected name/path, and available help; enlarge it for
+  the full description preview.
+- Check dark/light themes and remapped selection keys. The displayed help must
+  agree with the keys that actually navigate, load, cancel, and page details.
+- Edit or delete a selected file while the picker is open, then confirm. A valid
+  edit uses refreshed native metadata/body; deletion or native rejection adds no
+  context entry. Reopen to refresh discovery.
+- Verify a new session has no selected skill context. Resume retains only normal
+  conversation history, without a fresh skill read.
