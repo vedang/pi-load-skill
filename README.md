@@ -4,37 +4,67 @@ Explicit, on-demand loading of occasional-use local skills in Pi. The extension
 registers `/load-skill`, not a model-callable tool. It does not discover or
 advertise your catalog at startup.
 
-## Setup
+## Install
 
 Requires Pi with the extension, skill-discovery, and TUI APIs used by this package
 (developed against Pi 0.84.2), Node.js 22.19 or newer, and pnpm 12.16.1 for development.
 
-Try the extension from this checkout:
+Install the extension as a normal Pi package:
+
+```sh
+pi install git:github.com/vedang/pi-load-skill
+```
+
+Start a new Pi session, or run `/reload` in an existing session. The package
+manifest exposes only the extension. To update an installed copy:
+
+```sh
+pi update git:github.com/vedang/pi-load-skill
+```
+
+For development, try this checkout without installing it:
 
 ```sh
 pi -e ./src/index.ts
 ```
 
-For persistent loading, add this package directory to your normal Pi `packages`
-configuration. The package manifest exposes only the extension.
+## Configure the private catalog
 
-Separately, **you** must add `specific_skills` to the user-level `settings.json`
+Merge either or both of the following keys into the user-level `settings.json`
 inside Pi's agent directory (normally `~/.pi/agent`; respects Pi's
-`PI_CODING_AGENT_DIR` override):
+`PI_CODING_AGENT_DIR` override). Do not replace unrelated settings:
 
 ```json
 {
   "specific_skills": [
-    "~/src/vedang/agents/agents.root/specific_skills"
+    "~/src/private-skills"
+  ],
+  "specific_packages": [
+    "git:github.com/your-org/private-skill-package",
+    "~/src/another-local-package"
   ]
 }
 ```
 
-Merge this key into your existing settings; do not replace unrelated settings.
-The extension does not edit this file or interpret `specific_packages`.
-Paths may be absolute, start with `~/`, or be relative to the agent directory.
-Project-level `specific_skills` is not supported. Remote/package sources are not
-accepted.
+- `specific_skills`: local directory paths. Pi discovers skills under each root.
+  Remote/package source strings are not accepted in this list.
+- `specific_packages`: package-source strings. Pi locates **already installed**
+  Git/npm packages or existing local package directories, then discovers only
+  their native skill resources: `pi.skills` in `package.json`, or the conventional
+  `skills/` directory when there is no Pi manifest. Hidden/nonstandard directories
+  work when declared in the manifest. Extension-only packages add no skills.
+
+Local paths may be absolute, start with `~/`, or be relative to the agent directory.
+Either list may be omitted or empty if the other has entries. Project-level
+catalog settings are not supported. The extension does not edit settings, install,
+fetch, update, or repair package versions; it uses the local copy as-is. Missing
+packages produce diagnostics. Make the package available separately, or point to
+its existing local directory.
+
+`/load-skill` never imports or activates extensions from `specific_packages`.
+Pi's normal `packages` setting still controls startup activation independently;
+listing a package there can load its extensions and advertise its skills regardless
+of this loader.
 
 ## Use
 
@@ -68,7 +98,9 @@ filesystem snapshot. Native warnings remain warnings.
 - Settings and local catalogs are read only on invocation. Reopen to refresh.
 - Only entries named exactly `SKILL.md` are shown, not standalone Markdown files.
 - Pi owns parsing, frontmatter validation, ignore rules, and recursive discovery.
-  This extension adds root preflight checks and canonical-path deduplication.
+  Pi also owns package-source lookup and manifest/resource interpretation. This
+  extension adds root preflight checks and canonical-path deduplication across both
+  lists; package discovery receives only existing absolute local paths.
 - Distinct same-name skills remain available, with source paths for disambiguation.
 - Missing/unreadable roots and malformed skills produce UI diagnostics; other
   valid roots and skills remain usable. Native traversal can silently skip some
@@ -79,7 +111,8 @@ filesystem snapshot. Native warnings remain warnings.
   traversal, background index, watcher, network fetching, or persistent cache is
   provided.
 - Keep private catalogs outside Pi's ordinary skill-discovery locations and
-  `skills` configuration if you do not want Pi itself to advertise them.
+  `skills`/autoloaded `packages` configuration if you do not want Pi itself to
+  advertise them. Merely listing a source in `specific_packages` does not activate it.
 
 This is an invocation boundary, **not a filesystem sandbox**. An agent with file
 or shell access can independently discover and read catalog files. A separate
@@ -110,6 +143,12 @@ interaction. The integration suite drives the real command and picker against
 local files, and starts a real isolated Pi process to smoke-test package loading,
 absence of catalog reads/advertisement, and absence of model-callable tools.
 The suites are deterministic and need no model credentials or network requests.
+Catalog tests cover both settings, native installed Git/npm/local package lookup,
+manifest/conventional skill roots, cross-source deduplication, missing packages,
+and nonactivation of bundled extensions. The real-Pi smoke also accepts
+`PI_LOAD_SKILL_TEST_PACKAGE` (an absolute package directory) and
+`PI_LOAD_SKILL_TEST_CLI` (an absolute Pi CLI JavaScript entry) to check an installed
+copy/host without touching active settings or conversation history.
 The project explicitly denies the inspected `@google/genai` no-op preinstall
 and `protobufjs` version-warning postinstall scripts in `pnpm-workspace.yaml`;
 neither builds runtime artifacts needed here. If pnpm asks about new dependency

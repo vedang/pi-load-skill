@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   rmSync,
@@ -33,11 +34,96 @@ function skill(
 }
 
 describe("private catalog configuration and native discovery", () => {
-  it.each([{}, { specific_skills: [] }, { specific_packages: ["ignored"] }])(
+  it.each([
+    ["package", "package"],
+    ["git:github.com/example/package.git@v1", "git/github.com/example/package"],
+    ["npm:@example/package@1.2.3", "npm/node_modules/@example/package"],
+  ])(
+    "discovers declared skills from installed source %s without activating extensions",
+    async (source, installedDirectory) => {
+      const root = join(agentDir, installedDirectory);
+      const selected = skill(join(root, ".agents/skills"), "included");
+      skill(join(root, ".agents/skills"), "excluded");
+      skill(root, "not-declared");
+      const marker = join(agentDir, "extension-executed");
+      writeFileSync(
+        join(root, "extension.ts"),
+        `import { writeFileSync } from "node:fs"; writeFileSync(${JSON.stringify(marker)}, "must not execute"); throw new Error("must not activate");`,
+      );
+      writeFileSync(
+        join(root, "package.json"),
+        JSON.stringify({
+          name: "@example/package",
+          version: "1.2.3",
+          pi: {
+            extensions: ["./extension.ts"],
+            skills: ["./.agents/skills/*", "!.agents/skills/excluded/**"],
+          },
+        }),
+      );
+      settings({ specific_packages: [source] });
+      const catalog = await readCatalog(agentDir);
+      expect(catalog.skills.map((entry) => entry.filePath)).toEqual([selected]);
+      expect(catalog.diagnostics).toEqual([]);
+      expect(existsSync(marker)).toBe(false);
+    },
+  );
+
+  it("combines both keys, deduplicates identical files, and respects native conventional package skills", async () => {
+    const packageRoot = join(agentDir, "package");
+    const packaged = skill(join(packageRoot, "skills"), "packaged");
+    const direct = skill(join(agentDir, "direct"), "local");
+    settings({
+      specific_skills: ["direct", "package/skills"],
+      specific_packages: ["package"],
+    });
+    const catalog = await readCatalog(agentDir);
+    expect(catalog.skills.map((entry) => entry.filePath).sort()).toEqual(
+      [direct, packaged].sort(),
+    );
+    expect(catalog.skills.map((entry) => entry.name)).toEqual([
+      "shared",
+      "shared",
+    ]);
+    expect(catalog.diagnostics).toEqual([]);
+  });
+
+  it("reports uninstalled packages without fetching them and keeps other package skills usable", async () => {
+    const selected = skill(join(agentDir, "package/skills"), "included");
+    settings({
+      specific_packages: ["git:github.com/example/missing", "package"],
+    });
+    const catalog = await readCatalog(agentDir);
+    expect(catalog.skills.map((entry) => entry.filePath)).toEqual([selected]);
+    expect(catalog.diagnostics.join("\n")).toContain(
+      "Package is not installed locally",
+    );
+    expect(existsSync(join(agentDir, "git"))).toBe(false);
+  });
+
+  it("does not treat an extension-only package as a skill collection", async () => {
+    const root = join(agentDir, "package");
+    skill(root, "not-declared");
+    writeFileSync(
+      join(root, "package.json"),
+      JSON.stringify({ pi: { extensions: ["./extension.ts"] } }),
+    );
+    writeFileSync(
+      join(root, "extension.ts"),
+      "throw new Error('must not execute');",
+    );
+    settings({ specific_packages: ["package"] });
+    expect(await readCatalog(agentDir)).toEqual({
+      skills: [],
+      diagnostics: [],
+    });
+  });
+
+  it.each([{}, { specific_skills: [] }, { specific_packages: [] }])(
     "gives setup guidance without inferring a catalog: %j",
-    (config) => {
+    async (config) => {
       settings(config);
-      expect(() => readCatalog(agentDir)).toThrow(
+      await expect(readCatalog(agentDir)).rejects.toThrow(
         /specific_skills.*settings.json/,
       );
     },
@@ -50,26 +136,29 @@ describe("private catalog configuration and native discovery", () => {
     { specific_skills: [""] },
     { specific_skills: [42] },
     { specific_skills: ["npm:skills"] },
-  ])("rejects invalid configuration: %j", (config) => {
+    { specific_packages: "git:github.com/example/skills" },
+    { specific_packages: [""] },
+    { specific_packages: [42] },
+  ])("rejects invalid configuration: %j", async (config) => {
     settings(config);
-    expect(() => readCatalog(agentDir)).toThrow();
+    await expect(readCatalog(agentDir)).rejects.toThrow();
   });
 
-  it("reports missing settings and invalid JSON without silently falling back", () => {
-    expect(() => readCatalog(agentDir)).toThrow(
+  it("reports missing settings and invalid JSON without silently falling back", async () => {
+    await expect(readCatalog(agentDir)).rejects.toThrow(
       /Add a nonempty specific_skills/,
     );
     writeFileSync(join(agentDir, "settings.json"), "{broken");
-    expect(() => readCatalog(agentDir)).toThrow(/Cannot read settings/);
+    await expect(readCatalog(agentDir)).rejects.toThrow(/Cannot read settings/);
   });
 
-  it("keeps distinct same-name skills while deduplicating symlinks and overlapping roots", () => {
+  it("keeps distinct same-name skills while deduplicating symlinks and overlapping roots", async () => {
     const root = join(agentDir, "catalog");
     const first = skill(root, "one");
     const second = skill(root, "two");
     symlinkSync(join(root, "one"), join(root, "alias"), "dir");
     settings({ specific_skills: ["catalog", root, join(root, "one")] });
-    const catalog = readCatalog(agentDir);
+    const catalog = await readCatalog(agentDir);
     expect(catalog.skills).toHaveLength(2);
     expect(catalog.skills.map((entry) => entry.name)).toEqual([
       "shared",
@@ -89,7 +178,7 @@ describe("private catalog configuration and native discovery", () => {
     ).toBe(true);
   });
 
-  it("preserves native warning/exclusion rules, ignores standalone files, and survives bad roots", () => {
+  it("preserves native warning/exclusion rules, ignores standalone files, and survives bad roots", async () => {
     const root = join(agentDir, "catalog");
     const valid = skill(root, "valid");
     const warned = skill(
@@ -112,7 +201,7 @@ describe("private catalog configuration and native discovery", () => {
         "catalog",
       ],
     });
-    const catalog = readCatalog(agentDir);
+    const catalog = await readCatalog(agentDir);
     expect(catalog.skills.map((entry) => entry.filePath).sort()).toEqual(
       [valid, warned].sort(),
     );

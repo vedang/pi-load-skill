@@ -9,13 +9,16 @@ import { SMOKE_MARKER } from "./fixtures/registration-probe.js";
 it("loads the package in real offline Pi without discovering or advertising the private catalog", () => {
   const agentDir = mkdtempSync(join(tmpdir(), "pi-load-skill-smoke-"));
   const root = resolve(fileURLToPath(new URL("../", import.meta.url)));
-  // Resolve the installed Pi entry, not a shell or a globally installed version.
-  const cli = join(
-    dirname(
-      fileURLToPath(import.meta.resolve("@earendil-works/pi-coding-agent")),
-    ),
-    "cli.js",
-  );
+  const packageRoot = resolve(process.env.PI_LOAD_SKILL_TEST_PACKAGE ?? root);
+  // Overrides let the same isolated smoke exercise an installed package/host.
+  const cli =
+    process.env.PI_LOAD_SKILL_TEST_CLI ??
+    join(
+      dirname(
+        fileURLToPath(import.meta.resolve("@earendil-works/pi-coding-agent")),
+      ),
+      "cli.js",
+    );
   try {
     const skillDir = join(agentDir, "catalog", "private-smoke-skill");
     mkdirSync(skillDir, { recursive: true });
@@ -36,7 +39,7 @@ it("loads the package in real offline Pi without discovering or advertising the 
         "-e",
         join(root, "__tests__/fixtures/registration-probe.ts"),
         "-e",
-        root,
+        packageRoot,
         "--offline",
         "--no-session",
         "--no-skills",
@@ -46,7 +49,12 @@ it("loads the package in real offline Pi without discovering or advertising the 
       ],
       {
         cwd: agentDir,
-        env: { ...process.env, PI_CODING_AGENT_DIR: agentDir, PI_OFFLINE: "1" },
+        env: {
+          ...process.env,
+          PI_CODING_AGENT_DIR: agentDir,
+          PI_OFFLINE: "1",
+          PI_LOAD_SKILL_TEST_PACKAGE: packageRoot,
+        },
         input: "",
         encoding: "utf8",
         timeout: 10_000,

@@ -47,12 +47,19 @@ export default function loadSkillExtension(pi: ExtensionAPI): void {
         return;
       }
       try {
-        const catalog = readCatalog(getAgentDir());
+        const catalog = await readCatalog(getAgentDir());
         for (const diagnostic of catalog.diagnostics)
           ctx.ui.notify(diagnostic, "warning");
         if (catalog.skills.length === 0) {
           ctx.ui.notify(
-            "No SKILL.md skills found. Check specific_skills roots and native skill diagnostics, then retry /load-skill.",
+            "No SKILL.md skills found. Check specific_skills directories, installed specific_packages, and native skill diagnostics, then retry /load-skill.",
+            "warning",
+          );
+          return;
+        }
+        if (!ctx.isIdle()) {
+          ctx.ui.notify(
+            "The agent became busy during discovery. Retry /load-skill once the current run finishes.",
             "warning",
           );
           return;

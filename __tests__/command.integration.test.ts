@@ -1,4 +1,5 @@
 import { rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createHarness } from "./support.js";
 
@@ -77,31 +78,40 @@ describe("manual command boundary", () => {
     expect(h.setEditorText).not.toHaveBeenCalled();
   });
 
-  it("revalidates and rereads only the confirmed instruction block without triggering a response", async () => {
-    h.configure();
-    const path = h.writeSkill("stripe", "stripe", "Old body.");
-    h.writeSkill("other", "other", "SECRET UNSELECTED BODY");
-    const { component, completion } = await h.open("stripe");
-    writeFileSync(
-      path,
-      "---\nname: stripe-updated\ndescription: Updated metadata\n---\nUse references/guide.md and scripts/run.sh.",
-    );
-    component.handleInput?.("\r");
-    await completion;
-    expect(h.sendMessage).toHaveBeenCalledExactlyOnceWith(
-      {
-        customType: "pi-load-skill",
-        content: `<skill name="stripe-updated" location="${path}">\nReferences are relative to ${path.slice(0, -"/SKILL.md".length)}.\n\nUse references/guide.md and scripts/run.sh.\n</skill>`,
-        display: true,
-        details: { name: "stripe-updated", filePath: path },
-      },
-      { triggerTurn: false },
-    );
-    expect(h.renderMessage()).toContain("Loaded skill: stripe-updated");
-    expect(h.renderMessage()).not.toContain("Use references");
-    expect(h.sendUserMessage).not.toHaveBeenCalled();
-    expect(h.setEditorText).not.toHaveBeenCalled();
-  });
+  it.each(["specific_skills", "specific_packages"])(
+    "revalidates and rereads only the confirmed %s instruction block without triggering a response",
+    async (key) => {
+      h.configure({ [key]: ["catalog"] });
+      const path = h.writeSkill("stripe", "stripe", "Old body.");
+      h.writeSkill("other", "other", "SECRET UNSELECTED BODY");
+      if (key === "specific_packages") {
+        writeFileSync(
+          join(h.agentDir, "catalog/package.json"),
+          JSON.stringify({ pi: { skills: ["./stripe", "./other"] } }),
+        );
+      }
+      const { component, completion } = await h.open("stripe");
+      writeFileSync(
+        path,
+        "---\nname: stripe-updated\ndescription: Updated metadata\n---\nUse references/guide.md and scripts/run.sh.",
+      );
+      component.handleInput?.("\r");
+      await completion;
+      expect(h.sendMessage).toHaveBeenCalledExactlyOnceWith(
+        {
+          customType: "pi-load-skill",
+          content: `<skill name="stripe-updated" location="${path}">\nReferences are relative to ${path.slice(0, -"/SKILL.md".length)}.\n\nUse references/guide.md and scripts/run.sh.\n</skill>`,
+          display: true,
+          details: { name: "stripe-updated", filePath: path },
+        },
+        { triggerTurn: false },
+      );
+      expect(h.renderMessage()).toContain("Loaded skill: stripe-updated");
+      expect(h.renderMessage()).not.toContain("Use references");
+      expect(h.sendUserMessage).not.toHaveBeenCalled();
+      expect(h.setEditorText).not.toHaveBeenCalled();
+    },
+  );
 
   it.each(["deleted", "missing-description", "malformed-yaml"])(
     "does not append a partial message after selected file becomes %s",
@@ -122,6 +132,19 @@ describe("manual command boundary", () => {
       );
     },
   );
+
+  it("does not open the picker when the agent becomes busy during asynchronous discovery", async () => {
+    h.configure();
+    h.writeSkill("stripe", "stripe");
+    vi.mocked(h.ctx.isIdle).mockReturnValueOnce(true).mockReturnValue(false);
+    await h.run();
+    expect(h.ui.custom).not.toHaveBeenCalled();
+    expect(h.sendMessage).not.toHaveBeenCalled();
+    expect(h.notify).toHaveBeenCalledWith(
+      expect.stringContaining("busy during discovery"),
+      "warning",
+    );
+  });
 
   it("rechecks idle after the picker interaction", async () => {
     h.configure();

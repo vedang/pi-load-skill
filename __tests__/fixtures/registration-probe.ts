@@ -12,7 +12,9 @@ export const SMOKE_MARKER = "PI_LOAD_SKILL_SMOKE_OK";
 /** Runs before the package, in an actual isolated Pi process. */
 export default function registrationProbe(pi: ExtensionAPI): void {
   const packageEntry = resolve(
-    fileURLToPath(new URL("../../src/index.ts", import.meta.url)),
+    process.env.PI_LOAD_SKILL_TEST_PACKAGE ??
+      fileURLToPath(new URL("../../", import.meta.url)),
+    "src/index.ts",
   );
   const catalogRoot = join(getAgentDir(), "catalog");
   const originalRead = fs.readFileSync;
