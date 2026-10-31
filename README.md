@@ -1,190 +1,272 @@
 # pi-load-skill
 
-Explicit, on-demand loading of occasional-use local skills in Pi. The extension
-registers `/load-skill`, not a model-callable tool. It does not discover or
-advertise your catalog at startup.
+Explicit, on-demand loading of private local and reviewed Hermes skills in Pi.
+`/load-skill` is a user command, **not** a model-callable tool. Startup only
+registers the command and transcript renderer: no catalog/settings discovery,
+checkout access, cloning, network activity, or skill advertisement.
 
 ## Install
 
-Requires Pi with the extension, skill-discovery, and TUI APIs used by this package
-(developed against Pi 0.84.2), Node.js 22.19 or newer, and pnpm 12.16.1 for development.
-
-Install the extension as a normal Pi package:
+Requires Node.js 22.19+ and Pi's extension, native skill-discovery, and custom TUI
+APIs (developed against Pi 0.84.2). Development uses pnpm 12.16.1.
 
 ```sh
 pi install git:github.com/vedang/pi-load-skill
-```
-
-Start a new Pi session, or run `/reload` in an existing session. The package
-manifest exposes only the extension. To update an installed copy:
-
-```sh
+# Start a new session or use /reload.
 pi update git:github.com/vedang/pi-load-skill
-```
-
-For development, try this checkout without installing it:
-
-```sh
+# Try this checkout without installing it:
 pi -e ./src/index.ts
 ```
 
-## Configure the private catalog
+The package exposes only the extension. It publishes a metadata catalog, **not**
+Hermes instructions, scripts, assets, Python code, or native `pi.skills` entries.
 
-Merge the following section (all sources are optional) into the user-level `settings.json`
-inside Pi's agent directory (normally `~/.pi/agent`; respects Pi's
-`PI_CODING_AGENT_DIR` override). Do not replace unrelated settings:
+## Configure
+
+Merge this section into **user-level** `<getAgentDir()>/settings.json` (normally
+`~/.pi/agent/settings.json`, honoring `PI_CODING_AGENT_DIR`). Do not replace
+unrelated settings. The extension never edits settings or reads project-level
+extension configuration.
 
 ```json
 {
   "load_specific_skills": {
     "specific_skills": ["~/src/private-skills"],
-    "specific_packages": ["~/src/another-local-package"],
+    "specific_packages": ["~/src/private-skill-package"],
     "hermes_agent_skills": "~/src/hermes-agent"
   }
 }
 ```
 
-**Breaking configuration change:** top-level `specific_skills` and
-`specific_packages` are no longer read. Move them inside `load_specific_skills`;
-obsolete keys produce diagnostics, not migration or fallback.
+Every source is optional. Personal-only and Hermes-only configurations work.
+Omit `hermes_agent_skills` to disable the integration. With no configured sources,
+the command displays setup guidance.
 
-- `specific_skills`: local directory paths. Pi discovers skills under each root.
-  Remote/package source strings are not accepted in this list.
-- `specific_packages`: package-source strings. Pi locates **already installed**
-  Git/npm packages or existing local package directories, then discovers only
-  their native skill resources: `pi.skills` in `package.json`, or the conventional
-  `skills/` directory when there is no Pi manifest. Hidden/nonstandard directories
-  work when declared in the manifest. Extension-only packages add no skills.
+**Breaking change:** top-level `specific_skills` and `specific_packages` are no
+longer supported. Move them into `load_specific_skills`. Obsolete keys produce
+actionable diagnostics; there is no fallback or automatic migration.
 
-Local paths may be absolute, start with `~/`, or be relative to the agent directory.
-Either list may be omitted or empty if the other has entries. Project-level
-catalog settings are not supported. The extension does not edit settings, install,
-fetch, update, or repair package versions; it uses the local copy as-is. Missing
-packages produce diagnostics. Make the package available separately, or point to
-its existing local directory.
+- `specific_skills`: array of nonempty local directory paths. Pi discovers
+  `SKILL.md` entries beneath each root; URLs/package specifications are rejected.
+- `specific_packages`: array of nonempty package-source strings. Existing local
+  directories, installed `git:github.com/org/package@ref`, and installed
+  `npm:@scope/package@version` sources work. Pi discovers declared `pi.skills`
+  resources, or conventional `skills/` when there is no Pi manifest. Hidden
+  roots work when declared; extension-only packages add no skills. This list
+  **never installs, fetches, updates, imports, or activates packages/extensions**.
+- `hermes_agent_skills`: one nonempty **local directory path**, not a URL, array,
+  or boolean. This is the only source that can clone a missing repository.
 
-`/load-skill` never imports or activates extensions from `specific_packages`.
-Pi's normal `packages` setting still controls startup activation independently;
-listing a package there can load its extensions and advertise its skills regardless
-of this loader.
+Local paths may be absolute, use `~/`, or be relative to the agent directory.
+Malformed JSON or a malformed settings/section object is an error. Independent
+source failures produce precise warnings without discarding healthy sources.
+Reopen the command to refresh settings and discovery.
 
-## Use
+Pi's normal `packages` and `skills` settings remain independent. Keep private
+catalogs outside ordinary Pi discovery locations if you do not want Pi itself to
+advertise them. Listing a package here does not change its normal activation.
+
+## Select and load
 
 ```text
 /load-skill
 /load-skill stripe
 ```
 
-The argument seeds search; it never bypasses confirmation. **Tab** toggles the
-highlighted skill; **Space** remains search text. Enter loads only checked skills;
-with zero checked entries it does nothing. Checks persist across filtering and
-scrolling; the header reports total and hidden checks. Each invocation starts
-unchecked. Escape cancels without changing model context. Search is
-live and fuzzy over skill name, description, and directory name. Up/down moves
-through a bounded results list; the selected source path and description appear
-below it. Page Up/Page Down scroll long previews. Pi's configured selection
-keybindings are respected and shown in the picker help. The picker
-uses Pi's temporary custom UI, preserving the editor draft present when it opens.
-Only interactive TUI mode with UI available is supported, and the agent must be
-idle. RPC receives an unsupported-mode notification; without UI, Pi receives a
-command error through the host (stderr in Pi 0.84.2 print/JSON modes), not arbitrary
-stdout or a conversation message.
+The argument seeds fuzzy search; even an exact match waits for explicit checks
+and confirmation.
 
-Loading adds one batch context message and a compact `Loaded N skills: …` transcript
-entry. It does **not** start a model turn. Write your next prompt to apply it.
-Only the checked instructions, names, file locations, and reference directories are
-included. Native revalidation and a fresh body read happen at confirmation, so a
-deleted or natively rejected skill is not partially loaded. Refreshed native
-metadata is used if it changed. This is best-effort edit detection, not an atomic
-filesystem snapshot. Native warnings remain warnings.
+| Key | Action |
+| --- | --- |
+| Up / Down | Highlight a row, including unavailable rows |
+| **Tab** | Toggle an eligible highlighted row |
+| **Space** | Insert searchable text, not a selection toggle |
+| Enter | Load **only checked** entries; zero checks is a no-op |
+| Escape | Discard pending checks without adding context |
+| Page Up / Page Down | Page through the full preview and prerequisites |
 
-## Discovery and boundaries
+Navigation, confirmation, cancellation, and preview paging use Pi's injected
+selection keybindings; the help shows remapped keys. Tab is the new explicit
+selection toggle. Each invocation starts unchecked.
 
-- Settings and local catalogs are read only on invocation. Reopen to refresh.
-- Only entries named exactly `SKILL.md` are shown, not standalone Markdown files.
-- Pi owns parsing, frontmatter validation, ignore rules, and recursive discovery.
-  Pi also owns package-source lookup and manifest/resource interpretation. This
-  extension adds root preflight checks and canonical-path deduplication across both
-  lists; package discovery receives only existing absolute local paths.
-- Distinct same-name skills remain available, with source paths for disambiguation.
-- Missing/unreadable roots and malformed skills produce UI diagnostics; other
-  valid roots and skills remain usable. Native traversal can silently skip some
-  unreadable descendants; root preflight does not make it a complete audit.
-- **Catalog trees must be acyclic, including directory symlinks.** Cyclic trees
-  are unsupported. Native traversal follows symlinks without cycle detection;
-  deduplicating results does not prevent repeated traversal. No replacement
-  traversal, background index, watcher, network fetching, or persistent cache is
-  provided.
-- Keep private catalogs outside Pi's ordinary skill-discovery locations and
-  `skills`/autoloaded `packages` configuration if you do not want Pi itself to
-  advertise them. Merely listing a source in `specific_packages` does not activate it.
+Personal skills appear first, Hermes second. Section headings are not focusable.
+Hermes rows show built-in/official-optional origin and category. Gray unavailable
+rows remain focusable: the preview gives their textual reason, and Tab cannot
+check them. Color is never the only indication of eligibility.
 
-This is an invocation boundary, **not a filesystem sandbox**. An agent with file
-or shell access can independently discover and read catalog files. A separate
-permission policy is required to prevent that. Review skills and bundled scripts
-before loading them.
+Checks persist while filtering and scrolling. The header shows the total checked
+count and how many are hidden by the current query. Distinct same-name files
+remain available; canonical file identities deduplicate overlapping roots and
+symlinks. Batch order follows section/display order, not toggle order.
+
+Confirmation freshly validates native metadata, rereads each body, and rechecks
+Hermes containment, decision, platform, dependencies, and complete resource hash.
+If any checked entry fails, **nothing is loaded**; diagnostics identify affected
+entries. Reopen the command to refresh. This is all-or-nothing preparation, not
+an atomic filesystem snapshot against concurrent writes.
+
+One custom context message contains all prepared instruction blocks. A bounded
+`Loaded N skills: …` summary appears in the transcript; expanded details show
+each origin and path. The extension sends with `triggerTurn: false`: **no model
+response, execution, or dependency installation starts automatically**. Write
+your next prompt to apply the instructions. Referenced skills are not autoloaded.
+
+The agent must remain idle. Only interactive TUI mode with UI is supported. RPC
+gets an unsupported-mode notification; print/JSON mode receives a host command
+error rather than arbitrary stdout or a context message. Temporary custom UI
+preserves the editor draft present when it opens, focus/IME propagation, regular
+and fullscreen modes, Unicode column widths, resizing, and bounded layout.
+
+## Managed Hermes checkout
+
+Upstream is fixed to `https://github.com/NousResearch/hermes-agent.git`.
+
+- **Existing checkout:** verify that the configured location is the actual Git
+  root and contains `skills/` and `optional-skills/`. Ordinary clones and Git
+  worktrees (`.git` files) are supported. No exact origin URL is required because
+  reviewed resource identity is independently checked. Never pull, reset, clean,
+  switch revision, install dependencies, or repair an existing tree.
+- **Missing location:** on explicit invocation, clone into an owned temporary
+  sibling, check out the exact catalog revision, validate it, then publish using
+  exclusive destination creation. Neither a preexisting file/partial directory
+  nor a concurrently created destination is replaced. Publication is not an
+  atomic snapshot; another invocation may briefly see an incomplete publication
+  and report a diagnostic. Failure cleanup removes only owned resources, not
+  unrelated concurrent additions.
+- Git uses argument-vector subprocesses, ignored stdin, noninteractive auth,
+  isolated Git configuration (no configured credential helpers/hooks/filters),
+  and a 120-second shared Git deadline. Progress and errors are notified. Proxy
+  and TLS environment settings remain available. Authentication-requiring
+  custom remotes are not supported: the remote is the public official URL.
+- No submodule recursion, repository-code imports, dependency execution,
+  credential probing, or Hermes profile configuration is performed. Missing Git,
+  offline access, permissions, timeouts, and invalid destinations are isolated
+  Hermes-source diagnostics; healthy personal skills remain usable.
+
+**The first invocation may access the network and write checkout files even if
+you subsequently cancel selection.** Cancellation is conversation-context-neutral,
+not a filesystem transaction. Updates and checkout maintenance remain manual.
+New clones use the audited revision; existing checkouts are never switched.
+
+## Portability catalog and boundaries
+
+`resources/hermes-catalog.json` contains schema/version metadata, full upstream
+revision, review date, paths, names/descriptions, origins/categories, concrete
+decisions/evidence, OS scope, standalone prerequisites, and deterministic full
+resource-tree hashes. The initial revision is
+`c419cf7c864ac0ee511dbd9f7091a8bba0b567ee`: **44 built-in + 149 official optional
+skills**, excluding plugin-local skills. Initial decisions: **102 portable,
+91 blocked**. Supported OS and native Pi validity can further reduce selectable
+rows on any particular host.
+
+Eligibility requires **portable decision + identical reviewed resources +
+supported OS + native Pi validity**. Blocked entries show their reason; new paths
+show `Not reviewed`; changed resources show `Changed since portability review`;
+unsupported systems show their platform reason. Missing or natively rejected
+resources produce diagnostics, never loadable ghost rows. Ordinary native
+warnings remain warnings; Pi owns parsing, validation, ignore rules, and traversal.
+
+The fingerprint covers sorted relative paths, byte lengths, and exact bytes of
+**every file**, including scripts, references, templates, assets, and tests—not
+just `SKILL.md`. Schema 1 rejects symlinks and special file types inside reviewed
+resource trees. No such resource symlinks occur in the initial baseline.
+
+Required Hermes runtime/modules, dedicated capabilities, preprocessing,
+provisioning, hard-coded installation paths, and unresolved required external
+resources are blocked. Generic file/terminal vocabulary can map to Pi; standalone
+CLI/library prerequisites are recorded, not installed or credential-probed.
+Optional integrations and explicit standalone fallbacks are distinguished from
+mandatory execution paths. Required blocked/unavailable skill dependencies block
+the caller. The metadata records review limitations and known content caveats.
+
+The same Hermes policy applies when a file is reached through a personal source
+or symlink into the configured checkout; canonical deduplication cannot restore
+eligibility. This is an **integration policy, not a filesystem security sandbox**.
+Users/agents can independently read or copy files. Static portability review is
+not a security audit or a guarantee of correct examples, working APIs, installed
+prerequisites, credentials, transitive environment support, or successful execution.
+
+Catalog trees must remain **acyclic, including directory symlinks**. Pi's native
+personal traversal does not detect cycles; result deduplication is not traversal
+cycle protection. There is no watcher, background index, persistent cache,
+scheduled review, runtime classifier, or automatic upstream/catalog update.
 
 ## Session semantics
 
-Loaded instructions are ordinary session history: branching, resume, and
-compaction follow Pi's normal rules. A resumed session may retain earlier loaded
-context, but the extension never rereads it on resume or reload. Compaction may
-summarize instructions; verbatim retention is not guaranteed. A fresh session
-starts without loaded selections. Repeated explicit loads add repeated messages.
-There is no unload operation because it cannot reverse instructions already seen
-by a model.
+Loaded instructions are ordinary session history. Branching, resume, and
+compaction follow Pi's rules; compaction may summarize them. Resume/reload does
+not reread files. New sessions start without loaded context. Explicit repeated
+loads append repeated messages. There is no unload operation.
 
-## Development
+## Development and manual catalog maintenance
 
 ```sh
 pnpm install
 make format
 make check
 make test
+
+# Offline metadata inventory and complete resource fingerprints:
+node scripts/hermes-catalog.mjs inventory /path/to/hermes-checkout
+# Compare actual resources with the bundled review (nonzero on drift):
+node scripts/hermes-catalog.mjs verify /path/to/hermes-checkout
+# After manual review, generate from one review entry per inventory skill:
+node scripts/hermes-catalog.mjs generate /path/to/hermes-checkout /tmp/review.json resources/hermes-catalog.json
 ```
 
-The unit suite covers catalog configuration/native discovery and picker
-interaction. The integration suite drives the real command and picker against
-local files, and starts a real isolated Pi process to smoke-test package loading,
-absence of catalog reads/advertisement, and absence of model-callable tools.
-The suites are deterministic and need no model credentials or network requests.
-Catalog tests cover both settings, native installed Git/npm/local package lookup,
-manifest/conventional skill roots, cross-source deduplication, missing packages,
-and nonactivation of bundled extensions. The real-Pi smoke also accepts
-`PI_LOAD_SKILL_TEST_PACKAGE` (an absolute package directory) and
-`PI_LOAD_SKILL_TEST_CLI` (an absolute Pi CLI JavaScript entry) to check an installed
-copy/host without touching active settings or conversation history.
-The project explicitly denies the inspected `@google/genai` no-op preinstall
-and `protobufjs` version-warning postinstall scripts in `pnpm-workspace.yaml`;
-neither builds runtime artifacts needed here. If pnpm asks about new dependency
-build scripts, review them explicitly; this extension does not approve scripts
-on your behalf. Never bypass a harness block
-with a different package manager or lower-level executable.
+`review.json` is an array of metadata objects containing `path`, `decision`,
+`reason`, `evidence`, `platforms`, `prerequisites`, `dependencies`, `reviewedFiles`,
+and `limitations` (optional `reviewCoverage` records bounded read ranges).
+Generation requires complete body-review evidence for every inventory path;
+it computes hashes itself, never infers portability. Use the existing catalog's
+entries as a review starting point, not as proof for changed content.
+
+For a manual update: inspect checkout revision and local changes; read complete
+bodies and all relevant scripts/references/templates/assets; trace imports,
+subprocesses, required tools, paths, linked skills, and external resources;
+reconcile required dependencies and platform scope; block unresolved closure;
+record exact evidence and limitations. Commit reviewed upstream changes before
+publishing a revision meant for fresh clones. Generate, verify, review the diff,
+and run all gates. Do not replace this review with regex hits. No Hermes code
+should enter this repository or `pi.skills`.
+
+Tests use temporary local Git repositories and controlled subprocess failures,
+not live GitHub. They cover discovery/policy, alias restrictions, checked-state
+interaction, all-or-nothing delivery, pinned clone/reuse/worktrees, timeout/race
+cleanup, and source/unpacked-package startup in real offline Pi. No active user
+settings are edited. The host smoke accepts `PI_LOAD_SKILL_TEST_PACKAGE` and
+`PI_LOAD_SKILL_TEST_CLI` overrides for isolated installed-host checks.
+
+The inspected `@google/genai` no-op preinstall and `protobufjs` version-warning
+postinstall remain denied in `pnpm-workspace.yaml`. Review new dependency scripts;
+never bypass a harness block with another package manager or executable.
 
 ### Manual terminal acceptance
 
-Run these checks in both modes, with a trusted acyclic catalog configured:
+Run both:
 
 ```sh
 pi -e ./src/index.ts --tui-mode regular
 pi -e ./src/index.ts --tui-mode fullscreen
 ```
 
-- Open `/load-skill stripe`; verify even an exact match waits for confirmation.
-- Search, navigate, and cancel. Confirm that no transcript message or model
-  response was produced. The editor draft present when the custom UI opens must
-  be restored on both cancellation and confirmation; command submission itself
-  still follows Pi's normal editor behavior.
-- Confirm a skill: one compact transcript entry appears, with no model response.
-  Send a separate prompt to apply it.
-- Check same-name skills, no matches, Unicode/IME input, long-description paging,
-  terminal resizing, and narrow widths. At very short terminal heights, the
-  picker reduces to input, selected name/path, and available help; enlarge it for
-  the full description preview.
-- Check dark/light themes and remapped selection keys. The displayed help must
-  agree with the keys that actually navigate, load, cancel, and page details.
-- Edit or delete a selected file while the picker is open, then confirm. A valid
-  edit uses refreshed native metadata/body; deletion or native rejection adds no
-  context entry. Reopen to refresh discovery.
-- Verify a new session has no selected skill context. Resume retains only normal
-  conversation history, without a fresh skill read.
+- Check two personal entries, filter one away, check an eligible Hermes entry,
+  and confirm: one ordered batch, no automatic model turn, bounded summary and
+  expanded origins/paths. Verify hidden counts, same-name files, and fresh checks
+  on reopening. Enter without checks must do nothing; Escape discards checks.
+- Confirm Tab toggles and Space searches; remap selection keys and compare help
+  with behavior. Navigate across headings and gray rows; inspect reasons and
+  prerequisites. Disabled Tab must not check a row.
+- Verify editor restoration on cancel/confirm; Unicode/IME, long preview paging,
+  dark/light themes, narrow/short terminals, resize, scrolling, and zero matches.
+  Very short terminals prioritize input and compact status; enlarge for details.
+- Edit/delete a checked personal file, or change a Hermes supporting script
+  while open: any invalid member aborts the entire batch. Check busy guards.
+- With temporary configured checkout storage, verify first-use progress and
+  cancellation's filesystem caveat, reuse without network, dirty/worktree
+  preservation, unrelated destinations left untouched, and personal-source
+  usability after a Git/network failure. Never use active user settings for this.
+- Verify new-session/resume semantics and no startup skill advertisement.
+
+Automated host smoke is not a substitute for these human terminal checks or a
+live first-use GitHub clone; disclose checks not actually performed.
