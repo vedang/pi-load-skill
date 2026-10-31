@@ -62,7 +62,9 @@ export default function loadSkillExtension(pi: ExtensionAPI): void {
         return;
       }
       try {
-        const catalog = await readCatalog(getAgentDir());
+        const catalog = await readCatalog(getAgentDir(), (message) =>
+          ctx.ui.notify(message, "info"),
+        );
         for (const diagnostic of catalog.diagnostics)
           ctx.ui.notify(diagnostic, "warning");
         if (catalog.skills.length === 0) {

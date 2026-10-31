@@ -7,18 +7,54 @@ import {
   type Skill,
 } from "@earendil-works/pi-coding-agent";
 import { readConfig } from "./config.js";
+import { HermesPolicy, readHermesMetadata } from "./hermes-catalog.js";
+import { ensureHermesCheckout } from "./hermes-checkout.js";
+
+export interface CatalogEntry extends Skill {
+  identity: string;
+  origin: "personal" | "hermes";
+  reason?: string;
+  category?: string;
+  label: string;
+  prerequisites: string[];
+  policy?: HermesPolicy;
+}
 
 interface Catalog {
-  skills: Skill[];
+  skills: CatalogEntry[];
   diagnostics: string[];
 }
 
 /** Invocation-local only. Pi owns all skill parsing, validation, and traversal. */
-export async function readCatalog(agentDir: string): Promise<Catalog> {
-  const { roots, packages, diagnostics } = readConfig(agentDir);
+export async function readCatalog(
+  agentDir: string,
+  progress: (message: string) => void = () => {},
+): Promise<Catalog> {
+  const { roots, packages, hermes, diagnostics } = readConfig(agentDir);
   const catalog: Catalog = { skills: [], diagnostics };
-  const seen = new Set<string>();
-  const discover = (dir: string, selectedFile?: string) => {
+  const seen = new Map<string, CatalogEntry>();
+  let policy: HermesPolicy | undefined;
+  let hermesRoot: string | undefined;
+  if (hermes) {
+    try {
+      const metadata = readHermesMetadata();
+      hermesRoot = await ensureHermesCheckout(
+        hermes,
+        metadata.revision,
+        progress,
+      );
+      policy = new HermesPolicy(hermes, metadata);
+    } catch (error) {
+      const reason = `Hermes source ${hermes}: ${String(error)}`;
+      diagnostics.push(reason);
+      policy = new HermesPolicy(hermes, undefined, reason);
+    }
+  }
+  const discover = (
+    dir: string,
+    selectedFile?: string,
+    hermesSource = false,
+  ) => {
     try {
       if (!statSync(dir).isDirectory()) throw new Error("not a directory");
       accessSync(dir, constants.R_OK | constants.X_OK);
@@ -34,9 +70,30 @@ export async function readCatalog(agentDir: string): Promise<Catalog> {
           continue;
         try {
           const identity = realpathSync(skill.filePath);
-          if (seen.has(identity)) continue;
-          seen.add(identity);
-          catalog.skills.push(skill);
+          const restricted =
+            policy && (hermesSource || policy.owns(skill.filePath));
+          const eligibility = restricted
+            ? policy?.evaluate(skill.filePath)
+            : undefined;
+          const entry: CatalogEntry = {
+            ...skill,
+            identity,
+            origin: restricted ? "hermes" : "personal",
+            reason: eligibility?.reason,
+            category: eligibility?.review?.category,
+            label: restricted
+              ? `Hermes ${eligibility?.review?.origin ?? "not reviewed"}`
+              : "Personal",
+            prerequisites: eligibility?.review?.prerequisites ?? [],
+            policy: restricted ? policy : undefined,
+          };
+          const previous = seen.get(identity);
+          if (previous) {
+            if (restricted) Object.assign(previous, entry);
+            continue;
+          }
+          seen.set(identity, entry);
+          catalog.skills.push(entry);
         } catch (error) {
           catalog.diagnostics.push(`${skill.filePath}: ${String(error)}`);
         }
@@ -92,5 +149,27 @@ export async function readCatalog(agentDir: string): Promise<Catalog> {
       }
     }
   }
+  if (hermesRoot) {
+    for (const tree of ["skills", "optional-skills"])
+      discover(resolve(hermesRoot, tree), undefined, true);
+    for (const entry of policy?.metadata?.entries ?? []) {
+      if (
+        !catalog.skills.some(
+          (skill) =>
+            skill.identity === resolve(hermesRoot, entry.path, "SKILL.md"),
+        )
+      ) {
+        catalog.diagnostics.push(
+          `Missing or natively invalid Hermes catalog resource: ${entry.path}/SKILL.md`,
+        );
+      }
+    }
+  }
+  catalog.skills.sort(
+    (a, b) =>
+      Number(a.origin === "hermes") - Number(b.origin === "hermes") ||
+      a.name.localeCompare(b.name) ||
+      a.identity.localeCompare(b.identity),
+  );
   return catalog;
 }

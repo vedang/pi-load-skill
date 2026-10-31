@@ -1,13 +1,19 @@
-import { accessSync, constants, readFileSync, statSync } from "node:fs";
+import {
+  accessSync,
+  constants,
+  readFileSync,
+  realpathSync,
+  statSync,
+} from "node:fs";
 import { basename, resolve } from "node:path";
 import {
   loadSkillsFromDir,
-  type Skill,
   stripFrontmatter,
 } from "@earendil-works/pi-coding-agent";
+import type { CatalogEntry } from "./catalog.js";
 
 /** Synchronous so the caller can recheck idle and deliver without yielding. */
-export function prepareSkillMessage(selected: Skill[]) {
+export function prepareSkillMessage(selected: CatalogEntry[]) {
   const prepared = selected.map(prepareOne);
   return {
     message: {
@@ -20,7 +26,19 @@ export function prepareSkillMessage(selected: Skill[]) {
   };
 }
 
-function prepareOne(selected: Skill) {
+function prepareOne(selected: CatalogEntry) {
+  if (realpathSync(selected.filePath) !== selected.identity)
+    throw new Error(
+      `Selected file identity changed: ${selected.filePath}. Reopen /load-skill.`,
+    );
+  if (selected.policy) {
+    const eligibility = selected.policy.evaluate(selected.filePath);
+    if (eligibility.reason)
+      throw new Error(
+        `${selected.name}: ${eligibility.reason}. Reopen /load-skill.`,
+      );
+  } else if (selected.reason)
+    throw new Error(`${selected.name}: ${selected.reason}`);
   if (basename(selected.filePath) !== "SKILL.md") {
     throw new Error("Only SKILL.md entries can be loaded.");
   }
@@ -42,7 +60,11 @@ function prepareOne(selected: Skill) {
   const body = stripFrontmatter(readFileSync(skill.filePath, "utf8"));
   return {
     content: `<skill name="${escapeAttribute(skill.name)}" location="${escapeAttribute(skill.filePath)}">\nReferences are relative to ${skill.baseDir}.\n\n${body}\n</skill>`,
-    details: { name: skill.name, filePath: skill.filePath, origin: "Personal" },
+    details: {
+      name: skill.name,
+      filePath: skill.filePath,
+      origin: selected.label,
+    },
     diagnostics: result.diagnostics.map(
       (item) => `${item.path}: ${item.message}`,
     ),

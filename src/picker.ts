@@ -1,226 +1,204 @@
 import { basename } from "node:path";
-import type { ExtensionContext, Skill } from "@earendil-works/pi-coding-agent";
+import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
   fuzzyFilter,
   Input,
   Key,
   matchesKey,
-  SelectList,
   stripTerminalSequences,
   truncateToWidth,
   wrapTextWithAnsi,
 } from "@earendil-works/pi-tui";
+import type { CatalogEntry } from "./catalog.js";
 
 export function showSkillPicker(
   ctx: ExtensionContext,
-  skills: Skill[],
+  skills: CatalogEntry[],
   query: string,
-): Promise<Skill[] | undefined> {
-  return ctx.ui.custom<Skill[] | undefined>((tui, theme, keybindings, done) => {
-    const input = new Input();
-    // Native text insertion leaves the caret after the seeded query. setValue()
-    // preserves the initial caret at zero, making delete-to-start a no-op.
-    input.handleInput(query);
-    const ordered = [...skills].sort(
-      (a, b) =>
-        a.name.localeCompare(b.name) || a.filePath.localeCompare(b.filePath),
-    );
-    const checked = new Set<string>();
-    let matches: Skill[] = [];
-    let list: SelectList;
-    let listHeight = 6;
-    let detailOffset = 0;
-    let detailPageSize = 1;
-    let detailLineCount = 0;
-    let closed = false;
-    const clean = (text: string) =>
-      stripTerminalSequences(text).replaceAll("\r", "");
-    const selected = () =>
-      matches.find((skill) => skill.filePath === list.getSelectedItem()?.value);
-    const finish = (skill: Skill[] | undefined) => {
-      if (closed) return;
-      closed = true;
-      done(skill);
-    };
-    const rebuildList = (preserveSelection: boolean) => {
-      const previous = preserveSelection
-        ? list?.getSelectedItem()?.value
-        : undefined;
-      list = new SelectList(
-        matches.map((skill) => ({
-          value: skill.filePath,
-          label: `${checked.has(skill.filePath) ? "[x]" : "[ ]"} ${clean(skill.name)}`,
-          description: clean(skill.description),
-        })),
-        listHeight,
-        {
-          selectedPrefix: (text) => theme.fg("accent", text),
-          selectedText: (text) => theme.fg("accent", text),
-          description: (text) => theme.fg("muted", text),
-          scrollInfo: (text) => theme.fg("dim", text),
-          noMatch: (text) => theme.fg("warning", text),
-        },
-      );
-      if (previous)
-        list.setSelectedIndex(
-          Math.max(
-            0,
-            matches.findIndex((skill) => skill.filePath === previous),
+): Promise<CatalogEntry[] | undefined> {
+  return ctx.ui.custom<CatalogEntry[] | undefined>(
+    (tui, theme, keybindings, done) => {
+      const input = new Input();
+      input.handleInput(query);
+      const checked = new Set<string>();
+      let matches: CatalogEntry[] = [];
+      let index = 0;
+      let detailOffset = 0;
+      let detailPageSize = 1;
+      let detailLineCount = 0;
+      let closed = false;
+      const clean = (text: string) =>
+        stripTerminalSequences(text).replaceAll("\r", "");
+      const selected = () => matches[index];
+      const finish = (value: CatalogEntry[] | undefined) => {
+        if (!closed) {
+          closed = true;
+          done(value);
+        }
+      };
+      const search = () => {
+        const found = new Set(
+          fuzzyFilter(
+            skills,
+            input.getValue(),
+            (skill) =>
+              `${skill.name} ${skill.description} ${basename(skill.baseDir)} ${skill.label} ${skill.category ?? ""}`,
           ),
         );
-    };
-    const search = () => {
-      matches = fuzzyFilter(
-        ordered,
-        input.getValue(),
-        (skill) =>
-          `${skill.name} ${skill.description} ${basename(skill.baseDir)}`,
-      );
-      detailOffset = 0;
-      rebuildList(false);
-    };
-    const keys = (action: Parameters<typeof keybindings.getKeys>[0]) =>
-      keybindings.getKeys(action).join("/") || "unbound";
-    search();
-
-    return {
-      get focused() {
-        return input.focused;
-      },
-      set focused(value: boolean) {
-        input.focused = value;
-      },
-      render(width) {
-        if (width < 1) return [];
-        const height = Math.max(1, Math.min(24, tui.terminal.rows - 5));
-        const help = wrapTextWithAnsi(
-          `${keys("tui.select.up")}/${keys("tui.select.down")} navigate · Tab toggle · ${keys("tui.select.confirm")} load checked · ${keys("tui.select.cancel")} cancel`,
-          width,
+        // Search membership changes, never section/display order or checked identity.
+        matches = skills.filter((skill) => found.has(skill));
+        index = 0;
+        detailOffset = 0;
+      };
+      const keys = (action: Parameters<typeof keybindings.getKeys>[0]) =>
+        keybindings.getKeys(action).join("/") || "unbound";
+      const status = (skill: CatalogEntry) =>
+        skill.reason ? `Unavailable: ${skill.reason}` : "Eligible";
+      const row = (skill: CatalogEntry, active: boolean) =>
+        theme.fg(
+          skill.reason ? "dim" : active ? "accent" : "text",
+          `${active ? ">" : " "} ${skill.reason ? "[-]" : checked.has(skill.identity) ? "[x]" : "[ ]"} ${clean(skill.name)} · ${clean(skill.label)}${skill.category ? ` · ${clean(skill.category)}` : ""}${skill.reason ? " · unavailable" : ""}`,
         );
-        // Keep input usable even on an unusually short terminal. On normal
-        // terminals reserve room for details and keyboard help before the list.
-        if (height < 10) {
-          if (listHeight !== 1) {
-            listHeight = 1;
-            rebuildList(true);
-          }
+      search();
+      return {
+        get focused() {
+          return input.focused;
+        },
+        set focused(value: boolean) {
+          input.focused = value;
+        },
+        render(width) {
+          if (width < 1) return [];
+          const height = Math.max(1, Math.min(24, tui.terminal.rows - 5));
+          const hidden = [...checked].filter(
+            (identity) => !matches.some((skill) => skill.identity === identity),
+          ).length;
+          const title = `Load skill · ${matches.length}/${skills.length} · ${checked.size} checked (${hidden} hidden)`;
+          const help = wrapTextWithAnsi(
+            `${keys("tui.select.up")}/${keys("tui.select.down")} navigate · Tab toggle · Space search · ${keys("tui.select.confirm")} load checked · ${keys("tui.select.cancel")} cancel`,
+            width,
+          );
           const skill = selected();
+          if (height < 10)
+            return [
+              ...input.render(Math.max(4, width)),
+              title,
+              skill ? row(skill, true) : "No matches",
+              skill ? clean(status(skill)) : "Keep typing or cancel",
+              ...help,
+            ]
+              .slice(0, height)
+              .map((line) => truncateToWidth(line, width));
+          const helpLines = help.slice(0, Math.min(3, height - 6));
+          const available = height - 3 - helpLines.length;
+          // Reserve two heading slots so mixed-section views stay bounded.
+          const count = Math.max(1, Math.min(6, Math.floor(available / 2) - 1));
+          const start = Math.max(
+            0,
+            Math.min(index - Math.floor(count / 2), matches.length - count),
+          );
+          const rows: string[] = [];
+          let group: CatalogEntry["origin"] | undefined;
+          for (const entry of matches.slice(start, start + count)) {
+            if (entry.origin !== group) {
+              group = entry.origin;
+              rows.push(
+                theme.fg(
+                  "muted",
+                  theme.bold(
+                    group === "personal" ? "Personal skills" : "Hermes skills",
+                  ),
+                ),
+              );
+            }
+            rows.push(row(entry, entry === skill));
+          }
+          if (!matches.length)
+            rows.push(theme.fg("muted", "No matches. Keep typing or cancel."));
+          const details = skill
+            ? [
+                status(skill),
+                skill.filePath,
+                skill.description,
+                ...(skill.prerequisites.length
+                  ? [
+                      `Prerequisites (not probed): ${skill.prerequisites.join("; ")}`,
+                    ]
+                  : []),
+              ].flatMap((text) => wrapTextWithAnsi(clean(text), width))
+            : [];
+          detailLineCount = details.length;
+          detailPageSize = Math.max(1, available - rows.length - 1);
+          detailOffset = Math.min(
+            detailOffset,
+            Math.max(0, detailLineCount - detailPageSize),
+          );
+          const detailView = details
+            .slice(detailOffset, detailOffset + detailPageSize)
+            .map((line) => theme.fg("muted", line));
+          if (detailLineCount > detailPageSize)
+            detailView.push(
+              theme.fg(
+                "dim",
+                `${keys("tui.select.pageUp")}/${keys("tui.select.pageDown")} details ${detailOffset + 1}–${Math.min(detailOffset + detailPageSize, detailLineCount)}/${detailLineCount}`,
+              ),
+            );
           return [
+            theme.fg("accent", theme.bold(title)),
             ...input.render(Math.max(4, width)),
-            skill ? clean(skill.name) : "No matches",
-            skill ? clean(skill.filePath) : "Keep typing or cancel",
-            ...help,
+            ...rows,
+            "",
+            ...detailView,
+            ...helpLines.map((line) => theme.fg("dim", line)),
           ]
             .slice(0, height)
             .map((line) => truncateToWidth(line, width));
-        }
-        const helpLines = help.slice(0, Math.min(3, height - 5));
-        const available = height - 3 - helpLines.length;
-        const nextListHeight = Math.max(
-          1,
-          Math.min(6, Math.floor(available / 2)),
-        );
-        if (nextListHeight !== listHeight) {
-          listHeight = nextListHeight;
-          rebuildList(true);
-        }
-        const skill = selected();
-        const resultLines =
-          matches.length > 0
-            ? list.render(Math.max(4, width))
-            : [theme.fg("muted", "No matches. Keep typing or cancel.")];
-        const detailLines = skill
-          ? [
-              ...wrapTextWithAnsi(clean(skill.filePath), width),
-              ...wrapTextWithAnsi(clean(skill.description), width),
-            ]
-          : [];
-        detailLineCount = detailLines.length;
-        // One details-help line remains available whenever the preview needs
-        // paging. The whole source path and description are reachable, not cut.
-        const detailBudget = Math.max(1, available - resultLines.length);
-        detailPageSize = Math.max(1, detailBudget - 1);
-        detailOffset = Math.min(
-          detailOffset,
-          Math.max(0, detailLineCount - detailPageSize),
-        );
-        const detailView = detailLines
-          .slice(detailOffset, detailOffset + detailPageSize)
-          .map((line) => theme.fg("muted", line));
-        if (detailLineCount > detailPageSize) {
-          detailView.push(
-            theme.fg(
-              "dim",
-              `${keys("tui.select.pageUp")}/${keys("tui.select.pageDown")} details ${detailOffset + 1}–${Math.min(detailOffset + detailPageSize, detailLineCount)}/${detailLineCount}`,
-            ),
-          );
-        }
-        return [
-          theme.fg(
-            "accent",
-            theme.bold(
-              `Load skill · ${matches.length}/${skills.length} · ${checked.size} checked (${[...checked].filter((path) => !matches.some((skill) => skill.filePath === path)).length} hidden)`,
-            ),
-          ),
-          ...input.render(Math.max(4, width)),
-          ...resultLines,
-          "",
-          ...detailView,
-          ...helpLines.map((line) => theme.fg("dim", line)),
-        ].map((line) => truncateToWidth(line, width));
-      },
-      handleInput(data) {
-        if (closed) return;
-        if (keybindings.matches(data, "tui.select.cancel")) {
-          finish(undefined);
-          return;
-        }
-        if (keybindings.matches(data, "tui.select.confirm")) {
-          if (checked.size)
-            finish(ordered.filter((skill) => checked.has(skill.filePath)));
-          return;
-        }
-        if (matchesKey(data, Key.tab)) {
-          const skill = selected();
-          if (skill) {
-            if (checked.has(skill.filePath)) checked.delete(skill.filePath);
-            else checked.add(skill.filePath);
-            rebuildList(true);
+        },
+        handleInput(data) {
+          if (closed) return;
+          if (keybindings.matches(data, "tui.select.cancel")) {
+            finish(undefined);
+            return;
           }
-        } else if (
-          keybindings.matches(data, "tui.select.up") ||
-          keybindings.matches(data, "tui.select.down")
-        ) {
-          if (matches.length > 0) {
-            const index = matches.findIndex(
-              (skill) => skill.filePath === selected()?.filePath,
-            );
-            const delta = keybindings.matches(data, "tui.select.up") ? -1 : 1;
-            // SelectList's input handler reads global keybindings. Use its public
-            // selection API so this interaction respects the injected manager.
-            list.setSelectedIndex(
-              (index + delta + matches.length) % matches.length,
-            );
+          if (matchesKey(data, Key.tab)) {
+            const skill = selected();
+            if (skill && !skill.reason) {
+              if (checked.has(skill.identity)) checked.delete(skill.identity);
+              else checked.add(skill.identity);
+            } else if (skill) detailOffset = 0;
+          } else if (keybindings.matches(data, "tui.select.confirm")) {
+            if (checked.size)
+              finish(skills.filter((skill) => checked.has(skill.identity)));
+            return;
+          } else if (
+            keybindings.matches(data, "tui.select.up") ||
+            keybindings.matches(data, "tui.select.down")
+          ) {
+            if (matches.length)
+              index =
+                (index +
+                  (keybindings.matches(data, "tui.select.up") ? -1 : 1) +
+                  matches.length) %
+                matches.length;
             detailOffset = 0;
+          } else if (keybindings.matches(data, "tui.select.pageUp"))
+            detailOffset = Math.max(0, detailOffset - detailPageSize);
+          else if (keybindings.matches(data, "tui.select.pageDown"))
+            detailOffset = Math.min(
+              Math.max(0, detailLineCount - detailPageSize),
+              detailOffset + detailPageSize,
+            );
+          else {
+            const previous = input.getValue();
+            input.handleInput(data);
+            if (input.getValue() !== previous) search();
           }
-        } else if (keybindings.matches(data, "tui.select.pageUp")) {
-          detailOffset = Math.max(0, detailOffset - detailPageSize);
-        } else if (keybindings.matches(data, "tui.select.pageDown")) {
-          detailOffset = Math.min(
-            Math.max(0, detailLineCount - detailPageSize),
-            detailOffset + detailPageSize,
-          );
-        } else {
-          const previous = input.getValue();
-          input.handleInput(data);
-          if (input.getValue() !== previous) search();
-        }
-        tui.requestRender();
-      },
-      invalidate() {
-        input.invalidate();
-        list.invalidate();
-      },
-    };
-  });
+          tui.requestRender();
+        },
+        invalidate() {
+          input.invalidate();
+        },
+      };
+    },
+  );
 }
