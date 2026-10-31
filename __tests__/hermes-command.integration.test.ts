@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { mkdirSync, realpathSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { readHermesMetadata } from "../src/hermes-catalog.js";
@@ -16,6 +16,26 @@ beforeEach(() => {
 afterEach(() => {
   h.dispose();
   vi.resetAllMocks();
+});
+
+it("uses the physical reviewed resource directory when a personal file alias is the only native discovery route", async () => {
+  const root = join(h.agentDir, "hermes");
+  const fixture = hermesFixture(root);
+  const path = fixture.add("eligible");
+  writeFileSync(join(root, "skills/.gitignore"), "examples/\n");
+  const alias = join(h.agentDir, "catalog/alias");
+  mkdirSync(alias, { recursive: true });
+  symlinkSync(path, join(alias, "SKILL.md"));
+  vi.mocked(readHermesMetadata).mockReturnValue(fixture.metadata);
+  h.configure({ specific_skills: ["catalog"], hermes_agent_skills: root });
+  const { component, completion } = await h.open();
+  component.handleInput?.("\t");
+  component.handleInput?.("\r");
+  await completion;
+  expect(h.sendMessage).toHaveBeenCalledOnce();
+  expect(h.sendMessage.mock.calls[0][0].content).toContain(
+    `References are relative to ${realpathSync(dirname(path))}.`,
+  );
 });
 
 it.each([false, true])(

@@ -2,6 +2,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -10,6 +11,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { readCatalog } from "../src/catalog.js";
+import { hermesFixture } from "./hermes-support.js";
 
 let agentDir: string;
 beforeEach(() => {
@@ -37,6 +39,18 @@ function skill(
 }
 
 describe("private catalog configuration and native discovery", () => {
+  it("reads the real bundled catalog for Hermes-only invocation and keeps unreviewed native candidates disabled", async () => {
+    const fixture = hermesFixture(join(agentDir, "hermes"));
+    const path = fixture.add("not-in-reviewed-catalog");
+    settings({ hermes_agent_skills: "hermes" });
+    const result = await readCatalog(agentDir);
+    expect(result.skills).toHaveLength(1);
+    expect(result.skills[0]).toMatchObject({
+      origin: "hermes",
+      reason: "Not reviewed",
+    });
+    expect(realpathSync(result.skills[0].filePath)).toBe(realpathSync(path));
+  });
   it.each([
     ["package", "package"],
     ["git:github.com/example/package.git@v1", "git/github.com/example/package"],

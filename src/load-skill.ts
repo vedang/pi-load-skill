@@ -5,7 +5,7 @@ import {
   realpathSync,
   statSync,
 } from "node:fs";
-import { basename, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import {
   loadSkillsFromDir,
   stripFrontmatter,
@@ -70,8 +70,11 @@ function prepareOne(selected: CatalogEntry) {
     );
   }
   const body = stripFrontmatter(readFileSync(skill.filePath, "utf8"));
+  const referenceDir = selected.policy
+    ? dirname(selected.identity)
+    : skill.baseDir;
   return {
-    content: `<skill name="${escapeAttribute(skill.name)}" location="${escapeAttribute(skill.filePath)}">\nReferences are relative to ${skill.baseDir}.\n\n${body}\n</skill>`,
+    content: `<skill name="${escapeAttribute(skill.name)}" location="${escapeAttribute(skill.filePath)}">\nReferences are relative to ${referenceDir}.\n\n${body}\n</skill>`,
     details: {
       name: skill.name,
       filePath: skill.filePath,

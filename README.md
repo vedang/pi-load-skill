@@ -155,9 +155,10 @@ revision, review date, paths, names/descriptions, origins/categories, concrete
 decisions/evidence, OS scope, standalone prerequisites, and deterministic full
 resource-tree hashes. The initial revision is
 `c419cf7c864ac0ee511dbd9f7091a8bba0b567ee`: **44 built-in + 149 official optional
-skills**, excluding plugin-local skills. Initial decisions: **102 portable,
-91 blocked**. Supported OS and native Pi validity can further reduce selectable
-rows on any particular host.
+skills**, excluding plugin-local skills. Initial decisions: **104 portable,
+89 blocked**. Supported OS and native Pi validity can further reduce selectable
+rows on any particular host. All bundled resource files have static-read review
+coverage, including tests; upstream code was not executed as part of that review.
 
 Eligibility requires **portable decision + identical reviewed resources +
 supported OS + native Pi validity**. Blocked entries show their reason; new paths
@@ -173,8 +174,11 @@ resource trees. No such resource symlinks occur in the initial baseline.
 
 Required Hermes runtime/modules, dedicated capabilities, preprocessing,
 provisioning, hard-coded installation paths, and unresolved required external
-resources are blocked. Generic file/terminal vocabulary can map to Pi; standalone
-CLI/library prerequisites are recorded, not installed or credential-probed.
+resources are blocked. Generic file/terminal/image-inspection vocabulary can map
+to Pi's actual capabilities; standalone CLI/library prerequisites are recorded,
+not installed or credential-probed. Image workflows require an image-capable
+model. Office document helpers are reviewed for macOS/Linux only: their Windows
+setup and recalculation paths retain unsupported Hermes/POSIX assumptions.
 Optional integrations and explicit standalone fallbacks are distinguished from
 mandatory execution paths. Required blocked/unavailable skill dependencies block
 the caller. The metadata records review limitations and known content caveats.

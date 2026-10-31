@@ -496,7 +496,8 @@
         "optional-skills/creative/ai-presenter-video/scripts/init_job.py:1-151 — stdlib initialization loads the bundled JSON template.",
         "optional-skills/creative/ai-presenter-video/scripts/preflight.py:1-177 — ffprobe subprocess and manual-review/consent flags gate progression.",
         "optional-skills/creative/ai-presenter-video/scripts/finalize_delivery.sh:1-167 — local ffmpeg encodes, shell utilities, optional Hermes scratch fallback, and contact-sheet generation; no generation backend.",
-        "optional-skills/creative/ai-presenter-video/references/qa-recovery.md:5-40 — acceptance includes visual and normal-speed playback review."
+        "optional-skills/creative/ai-presenter-video/references/qa-recovery.md:5-40 — acceptance includes visual and normal-speed playback review.",
+        "optional-skills/creative/ai-presenter-video/LICENSE:1-21 — Fully read during supporting-resource closure. MIT text contains no executable dependency or path assumption; retain the lanshu copyright and permission notice with redistribution. Corresponding SKILL.md was read fully; its Hermes generation tools and HERMES_SKILL_DIR expansion are contextual dependencies, not dependencies introduced by this license."
       ],
       "platforms": [
         "darwin",
@@ -514,21 +515,22 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "agent/skill_preprocessing.py",
+        "optional-skills/creative/ai-presenter-video/LICENSE",
         "optional-skills/creative/ai-presenter-video/SKILL.md",
-        "optional-skills/creative/ai-presenter-video/references/generation.md",
+        "optional-skills/creative/ai-presenter-video/assets/job.template.json",
         "optional-skills/creative/ai-presenter-video/references/editing.md",
+        "optional-skills/creative/ai-presenter-video/references/generation.md",
         "optional-skills/creative/ai-presenter-video/references/qa-recovery.md",
+        "optional-skills/creative/ai-presenter-video/scripts/finalize_delivery.sh",
         "optional-skills/creative/ai-presenter-video/scripts/init_job.py",
         "optional-skills/creative/ai-presenter-video/scripts/preflight.py",
-        "optional-skills/creative/ai-presenter-video/scripts/finalize_delivery.sh",
-        "optional-skills/creative/ai-presenter-video/assets/job.template.json",
-        "agent/skill_preprocessing.py",
         "tools/skills_tool.py"
       ],
       "limitations": [
         "Hyperframes is an optional compositor branch, not a mandatory dependency.",
         "No complete standalone generation/review route is specified or validated.",
-        "LICENSE was inventoried but not read; it is not part of the functional blocker."
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "LICENSE",
@@ -550,27 +552,165 @@
       "origin": "official-optional",
       "digest": "sha256:c7df0a96b0c46bc9d6e216ec4d6a238dc1201fa97a12e9d909bf743193e3b9b6",
       "decision": "blocked",
-      "reason": "The prescribed workflow explicitly depends on Hermes expansion of HERMES_SKILL_DIR and requires vision_analyze for screenshot verification. Generating HTML with Node alone does not satisfy its mandatory verification workflow.",
+      "reason": "The prescribed invocation relies on Hermes expansion of HERMES_SKILL_DIR, which Pi deliberately does not preprocess. Its fully reviewed Node/browser implementations are standalone, but the unchanged commands require that expansion. Pi image reads can cover screenshot inspection; vision_analyze wording is not an independent blocker.",
       "evidence": [
         "optional-skills/creative/anatomy/SKILL.md:22-39 — workspace-copy commands require Hermes to expand HERMES_SKILL_DIR.",
         "optional-skills/creative/anatomy/SKILL.md:45-53 — screenshot review specifies vision_analyze; capture helpers launch headless Chrome.",
         "optional-skills/creative/anatomy/SKILL.md:114-121 — verification requires reading every capture and performing detailed visual checks.",
-        "agent/skill_preprocessing.py:36-44 — HERMES_SKILL_DIR substitution is implemented by the Hermes preprocessor."
+        "agent/skill_preprocessing.py:36-44 — HERMES_SKILL_DIR substitution is implemented by the Hermes preprocessor.",
+        "optional-skills/creative/anatomy/LICENSE.txt:1-21 — Fully read during supporting-resource closure. MIT license; preserve copyright and permission notice in copies. No runtime dependencies.",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/arcade-cabinet.css:1-44 — Fully read during supporting-resource closure. Local SVG/DOM styling depends on kit-provided --anatomy-* variables and generated data attributes; no external stylesheet, font download or asset URL.",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/build.mjs:1-714 — Fully read during supporting-resource closure. Node built-ins fs/path/url plus ../../kit/{iso-kit,lathe,tube,audit}.mjs, ../../scripts/inline-kit.mjs and sibling parts/screen modules. Reads sibling CSS/live source and kit lathe source; strips imports/exports for browser inlining and substitutes __DATA__. Writes arcade-cabinet[-light].html beside build.mjs before auditOrExit; preserve directory layout in a writable workspace. No direct subprocess, network or Hermes API.",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/live.js:1-597 — Fully read during supporting-resource closure. Browser template, not standalone Node code: requires substituted __DATA__, inlined kit globals, G, makeParts, SCREEN and generated SVG selectors. Uses DOM, matchMedia, IntersectionObserver, animation frames and timers for coin physics, CRT/game simulation and keyboard/click controls; no remote resources or agent tools.",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/parts.mjs:1-89 — Fully read during supporting-resource closure. Pure exported factory with injected kit, lathe geometry, projection and stick data; generates SVG joystick/switch/coin parts. No imports, filesystem, subprocesses or external assets.",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/screen.mjs:1-114 — Fully read during supporting-resource closure. Self-contained exported bitmap font, sprites, formation and SVG screen generator. All artwork is embedded arrays/path strings; no emulator, ROM, image service or downloaded font required.",
+        "optional-skills/creative/anatomy/examples/desk-computer/build.mjs:1-435 — Fully read during supporting-resource closure. Node fs/path/url and relative iso-kit/inline-kit imports only. Writes desk-computer[-light].html beside script, embedding geometry, CSS and browser runtime. Typing is local SVG text/key animation, not a terminal or Hermes call; browser DOM, SVG text measurement, IntersectionObserver and animation frames required.",
+        "optional-skills/creative/anatomy/examples/dial-indicator/build.mjs:1-275 — Fully read during supporting-resource closure. Node fs/path/url plus relative iso-kit and inline-kit modules; emits dial-indicator[-light].html beside script. Embedded pointer/keyboard-driven carriage, plunger spring and needle use browser DOM, matchMedia, IntersectionObserver and kit globals. No dedicated browser tool, network or runtime service in source.",
+        "optional-skills/creative/anatomy/examples/raptor-engine/build.mjs:1-938 — Fully read during supporting-resource closure. Node built-ins plus relative iso-kit, lathe, tube, audit, gl and inline-kit modules. Reads sibling raptor.css/live.js, substitutes __DATA__, embeds glScript and writes raptor-engine[-light].html beside source before auditOrExit. Geometry recording/depth settling is local computation; no subprocess, downloaded engine model or Hermes runtime.",
+        "optional-skills/creative/anatomy/examples/raptor-engine/live.js:1-907 — Fully read during supporting-resource closure. Requires generated .rp DOM, injected data and inlined glLayer/smooth/burst/settle globals. Embedded GLSL renders plume, steam and shocks on two canvases; no shader or texture fetches. Browser SVG/DOM, WebGL, media queries, IntersectionObserver and animation frames required; missing WebGL is guarded, leaving SVG/explode controls.",
+        "optional-skills/creative/anatomy/examples/raptor-engine/raptor.css:1-359 — Fully read during supporting-resource closure. Local layered SVG/canvas layout, theme variables, blend modes, gradients and responsive/reduced-motion styling. Requires base kit CSS variables; no external fonts, imports or asset URLs.",
+        "optional-skills/creative/anatomy/examples/ripple-tank/build.mjs:1-558 — Fully read during supporting-resource closure. Node built-ins plus relative iso-kit/lathe/gl/tube/inline-kit and sibling model.mjs. Reads model source, ripple.css and live.js; strips model exports and substitutes __DATA__ for standalone HTML. Writes ripple-tank[-light].html beside script. All tank geometry, optical model and fallback paths generated locally; no direct network/subprocess.",
+        "optional-skills/creative/anatomy/examples/ripple-tank/live.js:1-579 — Fully read during supporting-resource closure. Browser template requires kit/GL/model globals, injected data and generated SVG/canvas nodes. Two WebGL layers use locally allocated RGBA history textures, not image/network assets; standard-derivatives extension has a shader fallback. If either layer is unavailable, updates SVG crest/nodal paths. Uses DOM, media queries, IntersectionObserver, animation frames and pointer/keyboard events.",
+        "optional-skills/creative/anatomy/examples/ripple-tank/model.mjs:1-131 — Fully read during supporting-resource closure. Pure JS water dispersion, damping, optical magnification/caustics, readout and projected SVG pattern calculations. Uses Math and caller-supplied projection/geometry; no imports, runtime tools, I/O or external numerical libraries.",
+        "optional-skills/creative/anatomy/examples/ripple-tank/ripple.css:1-103 — Fully read during supporting-resource closure. Pure CSS; no imports, URLs or external assets. Depends on iso markup/tokens, .rt-stage data-gl signaling and layered SVG/canvas positioning. Uses modern :has(), focus-visible and light-theme selectors; WebGL availability signaling must come from the host runtime, not this stylesheet.",
+        "optional-skills/creative/anatomy/examples/spot-plate/art.tsx:1-110 — Fully read during supporting-resource closure. Imports React, bundled kit/react/draw, local geometry and LiquidLive. Static SVG element props supply back/deck/front painter order; no Hermes APIs, subprocesses, filesystem access or remote resources.",
+        "optional-skills/creative/anatomy/examples/spot-plate/drops.ts:1-543 — Fully read during supporting-resource closure. Imports only bundled iso-kit and local rig. Implements distance-field sampling, marching contours, occlusion and SVG glass/glint paths with standard typed arrays and collections; bounded 420-entry cache and quarter-unit quantization. No external service, asset or tool dependency.",
+        "optional-skills/creative/anatomy/examples/spot-plate/fan.ts:1-84 — Fully read during supporting-resource closure. Pure TypeScript geometry using bundled extrude/iso/pathOf and rig constants. Rebuilds seven feeler-blade poses and floor halos from merge; no DOM, I/O, subprocess or Hermes runtime dependency.",
+        "optional-skills/creative/anatomy/examples/spot-plate/figure.tsx:1-25 — Fully read during supporting-resource closure. React composition through bundled Plate, local LiquidArt and rig-derived captions/readout; imports spot-plate.css. Requires a TSX/CSS-capable host plus global kit/iso.css and .iso wrapper; not a standalone Node-build entry point.",
+        "optional-skills/creative/anatomy/examples/spot-plate/geometry.ts:1-280 — Fully read during supporting-resource closure. Imports bundled iso-kit and local rig only. Builds base, wells, ruler, fan deck and bottle paths at module evaluation; all geometry and label text embedded, with no file loading, network resources or absolute paths.",
+        "optional-skills/creative/anatomy/examples/spot-plate/live.tsx:1-339 — Fully read during supporting-resource closure. Client React component depends on kit drawing/readout/stillness helpers and local drops/fan/rig. Requires browser SVG DOM mutation, requestAnimationFrame, IntersectionObserver, window timers, pointer capture and keyboard events; timers are page-local, not cron. Supports reduced motion and offscreen stopping; no dedicated browser_exec or Hermes API call.",
+        "optional-skills/creative/anatomy/examples/spot-plate/rig.ts:1-230 — Fully read during supporting-resource closure. Pure model, layout, camera fitting and accessible text; only bundled iso-kit import. Numeric constants and smooth distance fields are self-contained; no environment variables, paths, external datasets or subprocesses.",
+        "optional-skills/creative/anatomy/examples/spot-plate/spot-plate.css:1-92 — Fully read during supporting-resource closure. Self-contained CSS with no imports or URLs. Requires kit --anatomy-* tokens, .iso light-theme ancestry and generated ml-* SVG/data attributes; includes reduced-motion and mobile rules.",
+        "optional-skills/creative/anatomy/examples/test-rig/art.tsx:1-196 — Fully read during supporting-resource closure. Production illustration, not a test suite. React plus bundled draw helpers and local geometry/StretchLive; supplies static SVG props for base, rail, carriage, dial and probe. No tools, assets, network access or filesystem assumptions beyond relative imports.",
+        "optional-skills/creative/anatomy/examples/test-rig/figure.tsx:1-23 — Fully read during supporting-resource closure. Composes bundled Plate and StretchArt, uses rig's precomputed pull pose for caption and imports stretch.css. Supporting rig/view/stretch.css were read fully: model and camera are local, stylesheet has no external resources. Requires React/TSX host and global iso styling.",
+        "optional-skills/creative/anatomy/examples/test-rig/geometry.ts:1-305 — Fully read during supporting-resource closure. Bundled iso-kit and local view imports only. Module-load path construction covers all static machine parts; view.ts supplies fixed projection/layout and SVG translation helpers. No runtime commands, downloaded models or absolute paths.",
+        "optional-skills/creative/anatomy/examples/test-rig/live.tsx:1-511 — Fully read during supporting-resource closure. Client React component imports kit draw/live and local pose/rig/view; updates refs, SVG attributes and ARIA through a browser animation loop. Requires IntersectionObserver, matchMedia via asksForStillness, RAF, timers and pointer capture. Idle tour, keyboard interaction and reduced-motion behavior are local browser functionality, not unavailable Hermes scheduling/delegation tools.",
+        "optional-skills/creative/anatomy/examples/test-rig/pose.ts:1-107 — Fully read during supporting-resource closure. Pure frame builder imports bundled iso-kit, local rig.carried and view constants. Generates deformed glass, split coil paths, dial needle and SVG transforms; no browser API, subprocess, filesystem or external resource dependency.",
+        "optional-skills/creative/anatomy/examples/test-rig/rig.ts:1-170 — Fully read during supporting-resource closure. Dependency-free TypeScript spring/pose model using Math and local functions; import-time steady/press/release simulations require no Hermes services, filesystem, browser or external resources. Requires TypeScript-capable project tooling or transpilation.",
+        "optional-skills/creative/anatomy/examples/test-rig/stretch.css:1-80 — Fully read during supporting-resource closure. Local styling for .ms geometry, pointer state, responsive sizing and reduced motion; relies on shared --anatomy-* variables and .iso wrapper/theme. No imports, URLs, fonts fetched remotely or tool dependencies.",
+        "optional-skills/creative/anatomy/examples/test-rig/view.ts:1-98 — Fully read during supporting-resource closure. Imports iso and types via extensionless ../../kit/iso-kit; preserve directory layout and use TypeScript/bundler resolution rather than assuming direct Node ESM compatibility. Otherwise pure geometry/projection constants and transforms, with no I/O.",
+        "optional-skills/creative/anatomy/examples/turning-dial/build.mjs:1-479 — Fully read during supporting-resource closure. Node ESM builder uses node:fs/path/url and local iso-kit, lathe, audit, turn-build, turn-audit, inline-kit and gl modules. Reads sibling dial.css/live.js, injects __DATA__ and serialized follow/tapAt/breakAt functions, and embeds local turn/gl runtime source.",
+        "optional-skills/creative/anatomy/examples/turning-dial/dial.css:1-10 — Fully read during supporting-resource closure. Browser-only local CSS depends on .td-stage, .iso theme variables and data-gl/data-drag state supplied by the page/runtime; no external resources.",
+        "optional-skills/creative/anatomy/examples/turning-dial/live.js:1-338 — Fully read during supporting-resource closure. Build-time template, not independently runnable: requires substituted DATA/follow/tapAt/breakAt, injected TURN/glLayer/glslPose/GLSL_TURN/settle globals, .td-stage and readout DOM.",
+        "optional-skills/creative/anatomy/examples/turning-dial/stress.mjs:1-269 — Fully read during supporting-resource closure. Node built-ins plus local iso-kit/lathe/audit/tube/turn-build/turn-audit/inline-kit build the dense hand; direct entry writes turning-stress[-verify][-light].html next to the source. Retain sibling kit/scripts layout in writable workspace.",
+        "optional-skills/creative/anatomy/kit/audit.mjs:1-1850 — Fully read during supporting-resource closure. Imports camera/rounded-plan geometry from iso-kit, vector/curve/path operations from lathe and runsOf from tube. Implements local signed-distance, raster overlap, ordering, clearance, supports, route/markup and replay checks using standard JavaScript collections/typed arrays.",
+        "optional-skills/creative/anatomy/kit/canvas-painter.mjs:1-722 — Fully read during supporting-resource closure. Import-free browser Canvas2D renderer exported as CANVAS2D.mount; requires a populated live-SVG stage and controller scene/runs/frames/orderIndex/snapshot contract, computed CSS, Path2D, DOMMatrix and 2D canvas support.",
+        "optional-skills/creative/anatomy/kit/gl-shared.mjs:1-184 — Fully read during supporting-resource closure. Import-free GLSL/camera/envelope helpers and browser WebGL layer. Requires canvas.getContext('webgl'), shader precision/uniform/extension support and window.devicePixelRatio; returns null on unavailable context or shader/link failure.",
+        "optional-skills/creative/anatomy/kit/gl.mjs:1-184 — Fully read during supporting-resource closure. Self-contained GLSL/camera/spring utilities and WebGL1 canvas renderer, with no imports or external assets. glCamera/envelopes can run in Node; glLayer requires browser canvas/window and GPU or software WebGL.",
+        "optional-skills/creative/anatomy/kit/iso-kit.mjs:1-674 — Fully read during supporting-resource closure. Import-free plain ESM core: geometry/projection plus SVG/HTML/CSS string builders run in Node without packages. holdStill alone expects a DOM element when called.",
+        "optional-skills/creative/anatomy/kit/iso-kit.ts:1-842 — Fully read during supporting-resource closure. Typed core has no imports or third-party runtime dependencies; requires TypeScript tooling and DOM types for Element in holdStill, with actual DOM access only when that helper is called.",
+        "optional-skills/creative/anatomy/kit/iso.css:1-106 — Fully read during supporting-resource closure. Standalone shared theme/geometry/card CSS requires .iso wrapper and optional data-theme=light; uses CSS variables, SVG vector effects, animation and responsive/reduced-motion media queries. No @import, url() resources or remote fonts.",
+        "optional-skills/creative/anatomy/kit/react/draw.tsx:1-204 — Fully read during supporting-resource closure. Fully reviewed. Imports React, functions and types from ../iso-kit, and Stage from ./live.",
+        "optional-skills/creative/anatomy/kit/react/live.tsx:1-125 — Fully read during supporting-resource closure. Fully reviewed. This is a use-client React module using useSyncExternalStore, effects, refs, and callbacks.",
+        "optional-skills/creative/anatomy/kit/tube.mjs:1-306 — Fully read during supporting-resource closure. Fully reviewed. Imports iso/pathOf from ./iso-kit.mjs and geometry helpers from ./lathe.mjs.",
+        "optional-skills/creative/anatomy/references/motion.md:1-165 — Fully read during supporting-resource closure. Fully reviewed. Specifies browser-native animation, direct DOM writes, pointer capture, keyboard controls, IntersectionObserver visibility handling, reduced-motion handling, and accessible phase announcements.",
+        "optional-skills/creative/anatomy/references/react.md:1-42 — Fully read during supporting-resource closure. Fully reviewed. Documents a project-local components/iso layout, plain TypeScript geometry, server-built art, and client-side interaction components.",
+        "optional-skills/creative/anatomy/references/verify.md:1-351 — Fully read during supporting-resource closure. Fully reviewed. Verification is exposed through local Node CLIs: capture.mjs, drive.mjs, lines.mjs, turn-check.mjs, and turn-bench.mjs. A dedicated browser_exec tool is not inherently required.",
+        "optional-skills/creative/anatomy/references/walkthrough.md:1-75 — Fully read during supporting-resource closure. Design narrative and local TypeScript/React example references, not Hermes automation. rig.ts supplies the shared model; view.ts, geometry.ts, pose.ts and live.tsx supply projection, geometry and interaction. Referenced files exist.",
+        "optional-skills/creative/anatomy/references/webgl.md:1-473 — Fully read during supporting-resource closure. Uses bundled kit/gl.mjs, inline-kit.mjs and example live.js sources; browser prerequisites are WebGL1, SVG, canvas, requestAnimationFrame, IntersectionObserver and optional derivatives. No dedicated browser_exec or image-generation service is required.",
+        "optional-skills/creative/anatomy/scripts/capture.mjs:1-244 — Fully read during supporting-resource closure. Only node: built-ins are imported. Requires global fetch and WebSocket; relaunches Node with --experimental-websocket when WebSocket is absent.",
+        "optional-skills/creative/anatomy/scripts/drive.mjs:1-312 — Fully read during supporting-resource closure. Node built-ins plus sibling LINE_ENDS; same standalone Chrome/CDP and fetch/WebSocket requirements as capture. Reads optional actions JSON and preload JS, and creates parent directories for PNG outputs.",
+        "optional-skills/creative/anatomy/scripts/inline-kit.mjs:1-26 — Fully read during supporting-resource closure. Uses Node filesystem/path/URL built-ins to resolve ../kit relative to import.meta.url, not cwd. Reads and strips leading export declarations from iso-kit.mjs, gl.mjs, turn.mjs, turn-fixed.mjs, canvas-painter.mjs and gl-shared.mjs.",
+        "optional-skills/creative/anatomy/scripts/line-ends.mjs:1-273 — Fully read during supporting-resource closure. Exports browser function source via toString(); no imports, filesystem access, subprocesses or network calls.",
+        "optional-skills/creative/anatomy/scripts/lines.mjs:1-31 — Fully read during supporting-resource closure. Node child_process/path/URL built-ins only; resolves sibling drive.mjs from import.meta.url and spawns it using process.execPath with generated wait/lines actions.",
+        "optional-skills/creative/anatomy/scripts/turn-bench.mjs:1-74 — Fully read during supporting-resource closure. Imports bundled ../kit/turn.mjs and dynamically imports a caller-specified build module resolved from cwd. Requires exported T; optional follow maps controller values.",
+        "optional-skills/creative/anatomy/scripts/turn-check.mjs:1-661 — Fully read during supporting-resource closure. Node mode dynamically imports turn-fidelity.mjs and a build module exporting T/P, with possible build-module side effects. Browser mode uses built-ins, sibling LINE_ENDS, installed Chrome and loopback CDP; includes the experimental-WebSocket relaunch.",
+        "optional-skills/creative/anatomy/scripts/turn-fidelity.mjs:1-407 — Fully read during supporting-resource closure. Imports bundled iso-kit.mjs, lathe.mjs, tube.mjs and turn.mjs. Import inspection closes local dependencies: tube imports iso-kit/lathe, lathe imports iso-kit; these resources exist.",
+        "optional-skills/creative/anatomy/kit/lathe.mjs:1-1184 — Fully read during supporting-resource closure. Partial review only: visible portions import cameraOf, iso, and pathOf from ./iso-kit.mjs and implement numeric geometry and SVG construction.",
+        "optional-skills/creative/anatomy/kit/turn-audit.mjs:1-1096 — Fully read during supporting-resource closure. Partial review only: visible portions import TURN from ./turn.mjs, geometry/audit helpers from sibling modules, and separate/sampleShape from ./turn-build.mjs.",
+        "optional-skills/creative/anatomy/kit/turn-build.mjs:1-1348 — Fully read during supporting-resource closure. Partial review only: visible portions import TURN/TURN_CSS and sibling iso-kit, lathe, and audit functionality.",
+        "optional-skills/creative/anatomy/kit/turn-fixed.mjs:1-3800 — Fully read during supporting-resource closure. Partial review only: visible portions contain browser scene mounting and geometry/path allocation optimizations.",
+        "optional-skills/creative/anatomy/kit/turn.mjs:1-3610 — Fully read during supporting-resource closure. Partial review only: visible runtime portions use typed arrays, SVG DOM operations, performance.now, optional ResizeObserver, and window.__isoTurn.",
+        "optional-skills/creative/anatomy/references/3d.md:1-352 — Fully read during supporting-resource closure. Partial review only: visible documentation describes the optional beta turning-group engine, its Node build/audit workflow, browser runtime, and optional WebGL integration.",
+        "optional-skills/creative/anatomy/references/craft.md:1-325 — Fully read during supporting-resource closure. Earlier requested reads were truncated. No complete coverage or complete portability assessment is claimed.",
+        "optional-skills/creative/anatomy/references/kit.md:1-419 — Fully read during supporting-resource closure. Partial review only: visible documentation references the TypeScript and ESM core, geometry modules, recorder/audit helpers, WebGL, and turning tools."
       ],
       "platforms": [],
       "prerequisites": [
         "Node.js",
         "Chrome, Chromium, or a Playwright headless shell for capture and browser checks",
         "React/Next.js and TypeScript only for the corresponding optional output mode",
-        "Dedicated visual-analysis capability, absent from the target"
+        "Dedicated visual-analysis capability, absent from the target",
+        "Modern Node.js with fetch/WebSocket support or the documented experimental WebSocket flag",
+        "Chrome/Chromium or a compatible headless shell, writable temporary profiles, and loopback HTTP/WebSocket access",
+        "Writable workspace copy preserving examples/kit/scripts relative layout",
+        "Optional React and TypeScript host tooling for TSX examples",
+        "WebGL for shader effects and browser order validation"
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "agent/skill_preprocessing.py",
+        "optional-skills/creative/anatomy/LICENSE.txt",
         "optional-skills/creative/anatomy/SKILL.md",
-        "agent/skill_preprocessing.py"
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/arcade-cabinet.css",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/build.mjs",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/live.js",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/parts.mjs",
+        "optional-skills/creative/anatomy/examples/arcade-cabinet/screen.mjs",
+        "optional-skills/creative/anatomy/examples/desk-computer/build.mjs",
+        "optional-skills/creative/anatomy/examples/dial-indicator/build.mjs",
+        "optional-skills/creative/anatomy/examples/raptor-engine/build.mjs",
+        "optional-skills/creative/anatomy/examples/raptor-engine/live.js",
+        "optional-skills/creative/anatomy/examples/raptor-engine/raptor.css",
+        "optional-skills/creative/anatomy/examples/ripple-tank/build.mjs",
+        "optional-skills/creative/anatomy/examples/ripple-tank/live.js",
+        "optional-skills/creative/anatomy/examples/ripple-tank/model.mjs",
+        "optional-skills/creative/anatomy/examples/ripple-tank/ripple.css",
+        "optional-skills/creative/anatomy/examples/spot-plate/art.tsx",
+        "optional-skills/creative/anatomy/examples/spot-plate/drops.ts",
+        "optional-skills/creative/anatomy/examples/spot-plate/fan.ts",
+        "optional-skills/creative/anatomy/examples/spot-plate/figure.tsx",
+        "optional-skills/creative/anatomy/examples/spot-plate/geometry.ts",
+        "optional-skills/creative/anatomy/examples/spot-plate/live.tsx",
+        "optional-skills/creative/anatomy/examples/spot-plate/rig.ts",
+        "optional-skills/creative/anatomy/examples/spot-plate/spot-plate.css",
+        "optional-skills/creative/anatomy/examples/test-rig/art.tsx",
+        "optional-skills/creative/anatomy/examples/test-rig/figure.tsx",
+        "optional-skills/creative/anatomy/examples/test-rig/geometry.ts",
+        "optional-skills/creative/anatomy/examples/test-rig/live.tsx",
+        "optional-skills/creative/anatomy/examples/test-rig/pose.ts",
+        "optional-skills/creative/anatomy/examples/test-rig/rig.ts",
+        "optional-skills/creative/anatomy/examples/test-rig/stretch.css",
+        "optional-skills/creative/anatomy/examples/test-rig/view.ts",
+        "optional-skills/creative/anatomy/examples/turning-dial/build.mjs",
+        "optional-skills/creative/anatomy/examples/turning-dial/dial.css",
+        "optional-skills/creative/anatomy/examples/turning-dial/live.js",
+        "optional-skills/creative/anatomy/examples/turning-dial/stress.mjs",
+        "optional-skills/creative/anatomy/kit/audit.mjs",
+        "optional-skills/creative/anatomy/kit/canvas-painter.mjs",
+        "optional-skills/creative/anatomy/kit/gl-shared.mjs",
+        "optional-skills/creative/anatomy/kit/gl.mjs",
+        "optional-skills/creative/anatomy/kit/iso-kit.mjs",
+        "optional-skills/creative/anatomy/kit/iso-kit.ts",
+        "optional-skills/creative/anatomy/kit/iso.css",
+        "optional-skills/creative/anatomy/kit/lathe.mjs",
+        "optional-skills/creative/anatomy/kit/react/draw.tsx",
+        "optional-skills/creative/anatomy/kit/react/live.tsx",
+        "optional-skills/creative/anatomy/kit/tube.mjs",
+        "optional-skills/creative/anatomy/kit/turn-audit.mjs",
+        "optional-skills/creative/anatomy/kit/turn-build.mjs",
+        "optional-skills/creative/anatomy/kit/turn-fixed.mjs",
+        "optional-skills/creative/anatomy/kit/turn.mjs",
+        "optional-skills/creative/anatomy/references/3d.md",
+        "optional-skills/creative/anatomy/references/craft.md",
+        "optional-skills/creative/anatomy/references/kit.md",
+        "optional-skills/creative/anatomy/references/motion.md",
+        "optional-skills/creative/anatomy/references/react.md",
+        "optional-skills/creative/anatomy/references/verify.md",
+        "optional-skills/creative/anatomy/references/walkthrough.md",
+        "optional-skills/creative/anatomy/references/webgl.md",
+        "optional-skills/creative/anatomy/scripts/capture.mjs",
+        "optional-skills/creative/anatomy/scripts/drive.mjs",
+        "optional-skills/creative/anatomy/scripts/inline-kit.mjs",
+        "optional-skills/creative/anatomy/scripts/line-ends.mjs",
+        "optional-skills/creative/anatomy/scripts/lines.mjs",
+        "optional-skills/creative/anatomy/scripts/turn-bench.mjs",
+        "optional-skills/creative/anatomy/scripts/turn-check.mjs",
+        "optional-skills/creative/anatomy/scripts/turn-fidelity.mjs"
       ],
       "limitations": [
-        "The large kit, examples, browser helpers, and reference corpus were not all fully reviewed. No complete transitive implementation audit is claimed; the body already establishes independent blockers."
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated.",
+        "Numerical audit correctness, full-motion sampling cost, browser rendering fidelity, GPU behavior, and native Windows shell compatibility remain unvalidated."
       ],
       "resourceFiles": [
         "LICENSE.txt",
@@ -1312,7 +1452,15 @@
         "scripts/auto_fix_deps.py launches comfy or uvx through subprocess argument lists. Model downloads require an explicit URL mapping supplied with --models-from-file; it does not silently resolve arbitrary model names.",
         "scripts/comfyui_setup.sh resolves hardware_check.py relative to its own location, accepts --workspace and --port, and selects TMPDIR before its HERMES_HOME/HOME scratch fallback.",
         "scripts/hardware_check.py probes platform-specific utilities and system files, with optional torch probing; it does not import Hermes.",
-        "All eight workflow JSON files were read completely. Their model names, input-image placeholders, graph links, custom-node requirements, and output nodes are explicit. workflows/README.md documents model-name overrides and cloud/local differences."
+        "All eight workflow JSON files were read completely. Their model names, input-image placeholders, graph links, custom-node requirements, and output nodes are explicit. workflows/README.md documents model-name overrides and cloud/local differences.",
+        "optional-skills/creative/comfyui/tests/README.md:1-52 — Fully read during supporting-resource closure. Commands assume the ComfyUI skill directory is the working directory and require installed Python and pytest. Explicit -c tests/pytest.ini and addopts override avoid parent configuration/xdist coupling. Parent Hermes test runners are described, not invoked or required. The 'pure-stdlib' description overlooks pytest and requests imports in test_common.py.",
+        "optional-skills/creative/comfyui/tests/conftest.py:1-64 — Fully read during supporting-resource closure. Uses stdlib json/os/sys/pathlib plus pytest; resolves scripts/ and workflows/ relative to __file__, not a Hermes home directory. Prepends sibling scripts to sys.path for bare imports. Fixtures read sd15_txt2img.json, flux_dev_txt2img.json and wan_video_t2v.json. Cloud-marked tests are skipped only when COMFY_CLOUD_API_KEY is absent; providing it enables live access without another opt-in.",
+        "optional-skills/creative/comfyui/tests/pytest.ini:1-5 — Fully read during supporting-resource closure. Standalone pytest configuration registers the cloud marker, discovers from '.', and disables the xdist plugin. No Hermes runtime or tool dependency.",
+        "optional-skills/creative/comfyui/tests/test_check_deps.py:1-68 — Fully read during supporting-resource closure. Imports sibling check_deps through conftest's scripts path; exercises normalization, model matching and package-map values without explicit network or subprocess calls. 'comfy node install comfyui-videohelpersuite' is compared as a returned string, not executed; comfy-cli is not directly required by these test bodies.",
+        "optional-skills/creative/comfyui/tests/test_cloud_integration.py:1-95 — Fully read during supporting-resource closure. Imports _common HTTP/routing helpers and dynamically imports check_deps and health_check.main. Requires network access to https://cloud.comfy.org and COMFY_CLOUD_API_KEY; sends X-API-Key to system_stats, model-list and object_info endpoints. Depends on cloud tier responses, catalog contents and fixture models. No workflow submission is requested by these tests; health_check.main is called without --smoke-test. Not dependent on Hermes-specific tools.",
+        "optional-skills/creative/comfyui/tests/test_common.py:1-443 — Fully read during supporting-resource closure. Imports pytest and sibling _common for workflow parsing, routing, seeds, model aliases, media detection and safe output paths. Uses bundled workflows, including animatediff_video.json, and pytest temporary paths. Redirect tests directly import requests before the helper's HAS_REQUESTS skip check, so requests must be installed for those cases despite the documented stdlib-only claim. PreparedRequest/Response fixtures exercise auth stripping without HTTP calls.",
+        "optional-skills/creative/comfyui/tests/test_extract_schema.py:1-183 — Fully read during supporting-resource closure. Imports sibling extract_schema helpers; consumes local JSON fixtures supplied by conftest and inline workflow dictionaries. Covers connection tracing, bounded cycle handling, parameter/model/embedding extraction and duplicate parameter names. No explicit subprocess, live server, credentials or Hermes tool use.",
+        "optional-skills/creative/comfyui/tests/test_run_workflow.py:1-210 — Fully read during supporting-resource closure. Imports extract_schema and run_workflow; pytest tmp_path supplies writable image placeholders and fake downloaded outputs. FakeRunner replaces server downloads; tests construct ComfyRunner and inspect routing/auth without submitting workflows. Local :8188 and cloud.comfy.org are expected routing values, not live connections in these bodies. Constructor expectations for default host and absent partner key assume a suitably isolated configuration environment."
       ],
       "platforms": [
         "darwin",
@@ -1330,11 +1478,16 @@
         "For Comfy Cloud execution: network access, COMFY_CLOUD_API_KEY or --api-key, and an execution-capable paid subscription",
         "For gated model downloads: applicable Hugging Face/CivitAI credentials and model access",
         "For MP4 video workflows: ComfyUI-VideoHelperSuite and its FFmpeg requirements; AnimateDiff additionally requires AnimateDiff-Evolved and a motion module",
-        "For optional official-template conversion: the installed comfyui-workflow-templates package and a compatible ComfyUI node catalog"
+        "For optional official-template conversion: the installed comfyui-workflow-templates package and a compatible ComfyUI node catalog",
+        "Optional bundled tests additionally require pytest and requests; cloud-marked tests become live when COMFY_CLOUD_API_KEY is present"
       ],
       "dependencies": [],
       "reviewedFiles": [
         "optional-skills/creative/comfyui/SKILL.md",
+        "optional-skills/creative/comfyui/references/official-cli.md",
+        "optional-skills/creative/comfyui/references/rest-api.md",
+        "optional-skills/creative/comfyui/references/template-integrity.md",
+        "optional-skills/creative/comfyui/references/workflow-format.md",
         "optional-skills/creative/comfyui/scripts/_common.py",
         "optional-skills/creative/comfyui/scripts/auto_fix_deps.py",
         "optional-skills/creative/comfyui/scripts/check_deps.py",
@@ -1346,18 +1499,22 @@
         "optional-skills/creative/comfyui/scripts/run_batch.py",
         "optional-skills/creative/comfyui/scripts/run_workflow.py",
         "optional-skills/creative/comfyui/scripts/ws_monitor.py",
-        "optional-skills/creative/comfyui/references/official-cli.md",
-        "optional-skills/creative/comfyui/references/rest-api.md",
-        "optional-skills/creative/comfyui/references/template-integrity.md",
-        "optional-skills/creative/comfyui/references/workflow-format.md",
+        "optional-skills/creative/comfyui/tests/README.md",
+        "optional-skills/creative/comfyui/tests/conftest.py",
+        "optional-skills/creative/comfyui/tests/pytest.ini",
+        "optional-skills/creative/comfyui/tests/test_check_deps.py",
+        "optional-skills/creative/comfyui/tests/test_cloud_integration.py",
+        "optional-skills/creative/comfyui/tests/test_common.py",
+        "optional-skills/creative/comfyui/tests/test_extract_schema.py",
+        "optional-skills/creative/comfyui/tests/test_run_workflow.py",
         "optional-skills/creative/comfyui/workflows/README.md",
+        "optional-skills/creative/comfyui/workflows/animatediff_video.json",
+        "optional-skills/creative/comfyui/workflows/flux_dev_txt2img.json",
         "optional-skills/creative/comfyui/workflows/sd15_txt2img.json",
-        "optional-skills/creative/comfyui/workflows/sdxl_txt2img.json",
         "optional-skills/creative/comfyui/workflows/sdxl_img2img.json",
         "optional-skills/creative/comfyui/workflows/sdxl_inpaint.json",
+        "optional-skills/creative/comfyui/workflows/sdxl_txt2img.json",
         "optional-skills/creative/comfyui/workflows/upscale_4x.json",
-        "optional-skills/creative/comfyui/workflows/flux_dev_txt2img.json",
-        "optional-skills/creative/comfyui/workflows/animatediff_video.json",
         "optional-skills/creative/comfyui/workflows/wan_video_t2v.json"
       ],
       "limitations": [
@@ -1368,7 +1525,8 @@
         "check_deps.py does not include folder_errors in its is_ready calculation, so a positive report alone does not establish complete model availability.",
         "Some examples require server-version validation: the smoke workflow wires sampler latents directly to SaveImage; AnimateDiff's comment says WebP while its graph requests H.264 MP4; the workflow README names Wan 2.2 while the JSON names Wan 2.1.",
         "ComfyUI custom nodes execute code and automatic dependency repair installs software. These operations need appropriate trust and user authorization.",
-        "The tests directory is not part of the referenced runtime/supporting-material chain and is not claimed as reviewed."
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated.",
+        "Bundled cloud tests require credentials/network and are not offline validation; setting COMFY_CLOUD_API_KEY enables them without another explicit opt-in. Some test defaults also assume isolated ComfyUI configuration."
       ],
       "resourceFiles": [
         "SKILL.md",
@@ -1623,12 +1781,13 @@
       "category": "creative",
       "origin": "official-optional",
       "digest": "sha256:0c9b14dde7d94f1a601c902f727998545433350c373904224bfe89b1147f3ae1",
-      "decision": "blocked",
-      "reason": "The geometry/build CLI is standalone, but required character identification and pre-delivery quality checks explicitly depend on vision_analyze. No non-vision substitute is documented.",
+      "decision": "portable",
+      "reason": "The pinned external CLI performs local font geometry and assembly. Character labeling and quality review require image inspection, which Pi supplies through image-capable file reads; Hermes-specific image-tool naming does not imply a missing capability. No Hermes runtime or preprocessing is required.",
       "evidence": [
         "optional-skills/creative/draw-your-font/SKILL.md:23-35 — pins draw-your-font@0.1.0, requires Node >=18, and directs visual steps to vision_analyze.",
         "optional-skills/creative/draw-your-font/SKILL.md:65-83 — labeling requires inspecting numbered contact-sheet images.",
-        "optional-skills/creative/draw-your-font/SKILL.md:95-108 — mandatory pre-delivery critique uses vision_analyze on preview and glyph sheets."
+        "optional-skills/creative/draw-your-font/SKILL.md:95-108 — mandatory pre-delivery critique uses vision_analyze on preview and glyph sheets.",
+        "optional-skills/creative/draw-your-font/SKILL.md:23-161 — Full reread confirms local CLI commands and ordinary PNG inspection; images without a path explicitly require asking the user for a file."
       ],
       "platforms": [
         "darwin",
@@ -1639,7 +1798,7 @@
         "Node.js >=18 and npx",
         "draw-your-font@0.1.0 available through npm",
         "Local handwriting photographs",
-        "vision_analyze or an explicitly supported equivalent visual capability"
+        "Image-capable Pi model and image-reading support for contact sheets, previews, and glyph sheets"
       ],
       "dependencies": [],
       "reviewedFiles": [
@@ -1648,8 +1807,7 @@
       ],
       "limitations": [
         "The npm package and its transitive native dependencies were not downloaded or executed.",
-        "pixel-art is related metadata, not a required linked skill.",
-        "A Pi image-reading capability was not assumed."
+        "pixel-art is related metadata, not a required linked skill."
       ],
       "resourceFiles": [
         "SKILL.md",
@@ -1883,7 +2041,8 @@
       "evidence": [
         "optional-skills/creative/ip-as-logo/SKILL.md:20-42 — adaptation selects built-in image generation; delegation and vision are conditional.",
         "optional-skills/creative/ip-as-logo/SKILL.md:48-74 — required backend, Hermes configuration instructions, and separate image_generate calls.",
-        "optional-skills/creative/ip-as-logo/SKILL.md:119-155 — prompt and delivery contract require actual generated image outputs."
+        "optional-skills/creative/ip-as-logo/SKILL.md:119-155 — prompt and delivery contract require actual generated image outputs.",
+        "optional-skills/creative/ip-as-logo/LICENSE:1-26 — Fully read during supporting-resource closure. MIT notice plus upstream attribution and pinned commit; GitHub URLs are provenance, not runtime fetches. Retain s1dashu copyright and permission notice. Corresponding SKILL.md was read fully: its image_generate dependency, optional delegate_task and hermes tools setup instruction require adaptation in Pi, but the license itself is portable."
       ],
       "platforms": [
         "darwin",
@@ -1896,11 +2055,12 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "optional-skills/creative/ip-as-logo/LICENSE",
         "optional-skills/creative/ip-as-logo/SKILL.md"
       ],
       "limitations": [
         "No CLI replacement for the required image tool was established.",
-        "LICENSE was inventoried but not read; it is not an operational dependency."
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "LICENSE",
@@ -2006,7 +2166,8 @@
         "optional-skills/creative/meme-generation/SKILL.md:53-66 — default workflow requires discovery under ~/.hermes/skills and delivers a ~/.hermes/cache/scratch output through MEDIA.",
         "optional-skills/creative/meme-generation/SKILL.md:68-90 — image_generate and vision_analyze are explicitly conditional, not mandatory for classic templates.",
         "optional-skills/creative/meme-generation/scripts/generate_meme.py:18-46 — renderer requires Pillow, optionally uses requests, and otherwise falls back to urllib.",
-        "optional-skills/creative/meme-generation/scripts/generate_meme.py:159-193 — downloads templates into a script-relative cache and searches local fonts with a Pillow fallback."
+        "optional-skills/creative/meme-generation/scripts/generate_meme.py:159-193 — downloads templates into a script-relative cache and searches local fonts with a Pillow fallback.",
+        "optional-skills/creative/meme-generation/scripts/.gitignore:1-1 — Fully read during supporting-resource closure. Single relative .cache/ exclusion; no executable dependency. Corresponding SKILL.md identifies scripts/.cache/ as downloaded template storage, Pillow rendering and imgflip resources. Its ~/.hermes skill discovery, scratch output and MEDIA delivery conventions need Pi-local equivalents; optional image_generate is unavailable. The ignore rule itself is portable."
       ],
       "platforms": [
         "darwin",
@@ -2021,15 +2182,17 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
-        "optional-skills/creative/meme-generation/SKILL.md",
         "optional-skills/creative/meme-generation/EXAMPLES.md",
+        "optional-skills/creative/meme-generation/SKILL.md",
+        "optional-skills/creative/meme-generation/scripts/.gitignore",
         "optional-skills/creative/meme-generation/scripts/generate_meme.py",
         "optional-skills/creative/meme-generation/scripts/templates.json"
       ],
       "limitations": [
         "Windows font discovery has no explicit Windows font-directory candidate; fallback rendering quality was not tested.",
         "No templates were downloaded and no images were generated.",
-        "ascii-art is related metadata, not required."
+        "ascii-art is related metadata, not required.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "EXAMPLES.md",
@@ -2117,7 +2280,8 @@
         "optional-skills/creative/pixel-art/scripts/pixel_art.py:16-21 — dependency chain is Pillow plus bundled palettes.py, with package and direct-script import alternatives.",
         "optional-skills/creative/pixel-art/scripts/pixel_art.py:96-162 — reads caller-provided image paths and writes a caller-selected PNG.",
         "optional-skills/creative/pixel-art/scripts/pixel_art_video.py:19-26,236-345 — standard-library/Pillow imports, platform temporary directory, and argument-list FFmpeg subprocesses; no Hermes runtime dependency.",
-        "optional-skills/creative/pixel-art/scripts/palettes.py:1-167 — palette data and Pillow palette construction are fully bundled."
+        "optional-skills/creative/pixel-art/scripts/palettes.py:1-167 — palette data and Pillow palette construction are fully bundled.",
+        "optional-skills/creative/pixel-art/scripts/__init__.py:empty — Fully read during supporting-resource closure. Empty file: no imports, side effects or runtime assumptions. Corresponding SKILL.md was read fully; actual conversion requires Python/Pillow and animation requires ffmpeg. Its hardcoded ~/.hermes import/output paths require relocation; clarify can map to ordinary user questions. None of those dependencies originate in this package marker."
       ],
       "platforms": [
         "darwin",
@@ -2133,15 +2297,17 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
-        "optional-skills/creative/pixel-art/SKILL.md",
         "optional-skills/creative/pixel-art/ATTRIBUTION.md",
+        "optional-skills/creative/pixel-art/SKILL.md",
         "optional-skills/creative/pixel-art/references/palettes.md",
+        "optional-skills/creative/pixel-art/scripts/__init__.py",
+        "optional-skills/creative/pixel-art/scripts/palettes.py",
         "optional-skills/creative/pixel-art/scripts/pixel_art.py",
-        "optional-skills/creative/pixel-art/scripts/pixel_art_video.py",
-        "optional-skills/creative/pixel-art/scripts/palettes.py"
+        "optional-skills/creative/pixel-art/scripts/pixel_art_video.py"
       ],
       "limitations": [
-        "No rendering was executed. The palette reference's custom preset example names an unsupported preset; use one of the script's actual presets with overrides."
+        "No rendering was executed. The palette reference's custom preset example names an unsupported preset; use one of the script's actual presets with overrides.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "ATTRIBUTION.md",
@@ -2328,7 +2494,8 @@
         "optional-skills/creative/system-atlas/references/process-and-lessons.md:31-35 — prescribes parallel candidate researchers and synthesis.",
         "optional-skills/creative/system-atlas/assets/build.mjs:1-107 — complete build uses Node built-ins and a local data.mjs import.",
         "optional-skills/creative/system-atlas/assets/template.html:1-498 — complete renderer inspected; Google Fonts is the external stylesheet, with a local monospace fallback.",
-        "optional-skills/creative/system-atlas/SKILL.md:82-89 — also requires real-browser interaction verification."
+        "optional-skills/creative/system-atlas/SKILL.md:82-89 — also requires real-browser interaction verification.",
+        "optional-skills/creative/system-atlas/LICENSE.txt:1-21 — Fully read during supporting-resource closure. MIT, copyright 2026 Harshyt Goel; retain copyright and permission notice in copies/substantial portions. No executable dependencies or runtime restrictions."
       ],
       "platforms": [
         "darwin",
@@ -2343,17 +2510,19 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "optional-skills/creative/system-atlas/LICENSE.txt",
         "optional-skills/creative/system-atlas/SKILL.md",
-        "optional-skills/creative/system-atlas/references/design-language.md",
-        "optional-skills/creative/system-atlas/references/process-and-lessons.md",
         "optional-skills/creative/system-atlas/assets/build.mjs",
+        "optional-skills/creative/system-atlas/assets/data.example.mjs",
         "optional-skills/creative/system-atlas/assets/template.html",
-        "optional-skills/creative/system-atlas/assets/data.example.mjs"
+        "optional-skills/creative/system-atlas/references/design-language.md",
+        "optional-skills/creative/system-atlas/references/process-and-lessons.md"
       ],
       "limitations": [
         "design-md and architecture-diagram are optional guidance, not mandatory dependencies.",
         "Standalone artifact generation is technically separable from the blocked research workflow.",
-        "The renderer was not executed."
+        "The renderer was not executed.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "LICENSE.txt",
@@ -7334,7 +7503,10 @@
         "optional-skills/software-development/ast-grep/scripts/ast_grep_helper.py:384-404 — execution is an ordinary subprocess with captured output and timeout.",
         "optional-skills/software-development/ast-grep/scripts/ast_grep_helper.py:596-609 — install command invokes only the bundled platform installer.",
         "optional-skills/software-development/ast-grep/install.sh:30-36 — cache defaults to the skill's own bin directory.",
-        "optional-skills/software-development/ast-grep/install.ps1:152-196 — Windows fallback downloads and extracts a standalone ast-grep release."
+        "optional-skills/software-development/ast-grep/install.ps1:152-196 — Windows fallback downloads and extracts a standalone ast-grep release.",
+        "optional-skills/software-development/ast-grep/LICENSE:1-21 — Fully read during supporting-resource closure. MIT, copyright 2026 Yeongyu Kim; notice-preservation obligation only; no Hermes dependency.",
+        "optional-skills/software-development/ast-grep/tests/smoke.ps1:1-123 — Fully read during supporting-resource closure. Windows-oriented PowerShell 5.1+ harness resolves skill files relative to its own path, chooses py then python, creates redirected-output files under TEMP, and removes its temporary directory in finally.",
+        "optional-skills/software-development/ast-grep/tests/smoke.sh:1-212 — Fully read during supporting-resource closure. Requires Bash, python3 and ordinary shell utilities including mktemp, grep, uname, tr, chmod and wc. Resolves files relative to script location; temporary fixtures/output are removed by an EXIT trap."
       ],
       "platforms": [
         "darwin",
@@ -7350,23 +7522,27 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "optional-skills/software-development/ast-grep/LICENSE",
         "optional-skills/software-development/ast-grep/SKILL.md",
-        "optional-skills/software-development/ast-grep/scripts/ast_grep_helper.py",
-        "optional-skills/software-development/ast-grep/install.sh",
         "optional-skills/software-development/ast-grep/install.ps1",
-        "optional-skills/software-development/ast-grep/references/patterns.md",
-        "optional-skills/software-development/ast-grep/references/recipes.md",
-        "optional-skills/software-development/ast-grep/references/pitfalls.md",
+        "optional-skills/software-development/ast-grep/install.sh",
         "optional-skills/software-development/ast-grep/references/cli.md",
+        "optional-skills/software-development/ast-grep/references/install.md",
+        "optional-skills/software-development/ast-grep/references/patterns.md",
+        "optional-skills/software-development/ast-grep/references/pitfalls.md",
+        "optional-skills/software-development/ast-grep/references/recipes.md",
         "optional-skills/software-development/ast-grep/references/sgconfig.md",
         "optional-skills/software-development/ast-grep/references/yaml-rules.md",
-        "optional-skills/software-development/ast-grep/references/install.md"
+        "optional-skills/software-development/ast-grep/scripts/ast_grep_helper.py",
+        "optional-skills/software-development/ast-grep/tests/smoke.ps1",
+        "optional-skills/software-development/ast-grep/tests/smoke.sh"
       ],
       "limitations": [
         "Optional manual-download documentation uses ~/.hermes/cache/scratch, but bundled installers and ordinary package installation avoid it.",
         "An OMO_AST_GREP_BIN_DIR override is not automatically included in the wrapper's default skill-local cache lookup; use PATH or the explicit binary override.",
         "Installers download executable releases without a checksum verification step.",
-        "Tests were not executed; their files were not required by the operational import/subprocess chain."
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated.",
+        "Bundled Bash/PowerShell smoke harnesses have path/argument quoting risks, especially installed paths containing spaces; these were inspected but not executed."
       ],
       "resourceFiles": [
         "LICENSE",
@@ -7618,7 +7794,8 @@
         "optional-skills/software-development/pr-lens/SKILL.md:63-96 — PR attachment and provider-based analysis are conditional paths.",
         "optional-skills/software-development/pr-lens/references/graph-document.md:1-315 — document schema, reference integrity, walkthroughs, layout, and validation are described locally.",
         "optional-skills/software-development/pr-lens/references/config.md:1-105 — optional correction overlay uses a normal repository YAML file.",
-        "optional-skills/software-development/pr-lens/references/example.graph.json:1-763 — complete bundled graph example inspected, including provenance, views, and walkthrough."
+        "optional-skills/software-development/pr-lens/references/example.graph.json:1-763 — complete bundled graph example inspected, including provenance, views, and walkthrough.",
+        "optional-skills/software-development/pr-lens/LICENSE.txt:1-21 — Fully read during supporting-resource closure. MIT, copyright 2026 Coldtea AI; preserve notice. License itself requires no CLI, service or Hermes runtime."
       ],
       "platforms": [
         "darwin",
@@ -7635,15 +7812,17 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "optional-skills/software-development/pr-lens/LICENSE.txt",
         "optional-skills/software-development/pr-lens/SKILL.md",
-        "optional-skills/software-development/pr-lens/references/graph-document.md",
         "optional-skills/software-development/pr-lens/references/config.md",
-        "optional-skills/software-development/pr-lens/references/example.graph.json"
+        "optional-skills/software-development/pr-lens/references/example.graph.json",
+        "optional-skills/software-development/pr-lens/references/graph-document.md"
       ],
       "limitations": [
         "The external CLI is resolved at @latest, so its exact implementation and dependency graph were not audited or pinned.",
         "Windows support was not established by the declared platform list or documented verification.",
-        "The body claims live verification; this audit did not repeat it."
+        "The body claims live verification; this audit did not repeat it.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "LICENSE.txt",
@@ -7983,7 +8162,8 @@
         "optional-skills/web-development/scrollcraft/scripts/shoot.mjs:19-83,620-644 — loads playwright-core from the build directory, launches installed Chrome, and invokes FFmpeg for the contact sheet.",
         "optional-skills/web-development/scrollcraft/scripts/kie.mjs:23-202 — ordinary HTTPS asset generation/upload/download using KIE_AI_API_KEY.",
         "optional-skills/web-development/scrollcraft/engine/scrollcraft.js:1-1167 — complete dependency-free browser engine inspected; media references are caller-authored page assets.",
-        "optional-skills/web-development/scrollcraft/references/verify.md:1-424 — verification limits, real-device diagnostic, and manual image inspection requirements inspected."
+        "optional-skills/web-development/scrollcraft/references/verify.md:1-424 — verification limits, real-device diagnostic, and manual image inspection requirements inspected.",
+        "optional-skills/web-development/scrollcraft/LICENSE.txt:1-21 — Fully read during supporting-resource closure. MIT, copyright 2026 Nate Herk; preserve notice. No executable or external-resource dependency in this file."
       ],
       "platforms": [
         "darwin",
@@ -8005,34 +8185,36 @@
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "optional-skills/web-development/scrollcraft/LICENSE.txt",
         "optional-skills/web-development/scrollcraft/SKILL.md",
-        "optional-skills/web-development/scrollcraft/references/assets.md",
-        "optional-skills/web-development/scrollcraft/references/taste.md",
-        "optional-skills/web-development/scrollcraft/references/feel.md",
-        "optional-skills/web-development/scrollcraft/references/devices.md",
-        "optional-skills/web-development/scrollcraft/references/verify.md",
-        "optional-skills/web-development/scrollcraft/references/template.html",
-        "optional-skills/web-development/scrollcraft/references/worldflight.md",
-        "optional-skills/web-development/scrollcraft/references/uniqueness.md",
-        "optional-skills/web-development/scrollcraft/references/device-diag.html",
-        "optional-skills/web-development/scrollcraft/references/worlds.md",
-        "optional-skills/web-development/scrollcraft/scripts/workspace.mjs",
-        "optional-skills/web-development/scrollcraft/scripts/kie.mjs",
-        "optional-skills/web-development/scrollcraft/scripts/shoot.mjs",
-        "optional-skills/web-development/scrollcraft/scripts/encode.sh",
-        "optional-skills/web-development/scrollcraft/scripts/doctor.mjs",
-        "optional-skills/web-development/scrollcraft/scripts/worldflight-assert.mjs",
-        "optional-skills/web-development/scrollcraft/scripts/serve.mjs",
-        "optional-skills/web-development/scrollcraft/templates/FINGERPRINTS.md",
         "optional-skills/web-development/scrollcraft/engine/scrollcraft.css",
-        "optional-skills/web-development/scrollcraft/engine/scrollcraft.js"
+        "optional-skills/web-development/scrollcraft/engine/scrollcraft.js",
+        "optional-skills/web-development/scrollcraft/references/assets.md",
+        "optional-skills/web-development/scrollcraft/references/device-diag.html",
+        "optional-skills/web-development/scrollcraft/references/devices.md",
+        "optional-skills/web-development/scrollcraft/references/feel.md",
+        "optional-skills/web-development/scrollcraft/references/taste.md",
+        "optional-skills/web-development/scrollcraft/references/template.html",
+        "optional-skills/web-development/scrollcraft/references/uniqueness.md",
+        "optional-skills/web-development/scrollcraft/references/verify.md",
+        "optional-skills/web-development/scrollcraft/references/worldflight.md",
+        "optional-skills/web-development/scrollcraft/references/worlds.md",
+        "optional-skills/web-development/scrollcraft/scripts/doctor.mjs",
+        "optional-skills/web-development/scrollcraft/scripts/encode.sh",
+        "optional-skills/web-development/scrollcraft/scripts/kie.mjs",
+        "optional-skills/web-development/scrollcraft/scripts/serve.mjs",
+        "optional-skills/web-development/scrollcraft/scripts/shoot.mjs",
+        "optional-skills/web-development/scrollcraft/scripts/workspace.mjs",
+        "optional-skills/web-development/scrollcraft/scripts/worldflight-assert.mjs",
+        "optional-skills/web-development/scrollcraft/templates/FINGERPRINTS.md"
       ],
       "limitations": [
         "Static audit only: no browser, media encoding, or paid API calls were executed.",
         "The real-device diagnostic needs user/device cooperation; desktop headless checks cannot establish iOS behavior.",
         "worldflight-assert.mjs references window.__sc, while the engine publishes ScrollCraft.instances and the stock template does not assign __sc; a page must expose its returned instance for that assertion path.",
         "Upstream worked examples are not bundled; references label them illustrative rather than required resources.",
-        "Windows operation requires explicit browser/FFmpeg configuration and a POSIX shell environment."
+        "Windows operation requires explicit browser/FFmpeg configuration and a POSIX shell environment.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "LICENSE.txt",
@@ -8383,7 +8565,25 @@
         "skills/autonomous-ai-agents/hermes-agent/SKILL.md:119-227 — Hermes process spawning, delegate_task/cron advice, and mandatory runtime/configuration invariants.",
         "skills/autonomous-ai-agents/hermes-agent/references/configuration.md:1-92 — concrete Hermes configuration, toolset, and voice provisioning.",
         "skills/autonomous-ai-agents/hermes-agent/references/background-systems.md:1-101 — Hermes delegation, cron, curator, and kanban state/services.",
-        "skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md:1-151 — complete Hermes CLI and state-management command reference."
+        "skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md:1-151 — complete Hermes CLI and state-management command reference.",
+        "skills/autonomous-ai-agents/hermes-agent/references/contributor-guide.md:1-139 — Fully read during supporting-resource closure. Repository-contribution instructions depend on Hermes Python modules: tools.registry.registry, toolsets.py, hermes_cli.commands, cli.py, gateway/run.py, and hermes_constants.get_hermes_home(). These are not Pi extension APIs.",
+        "skills/autonomous-ai-agents/hermes-agent/references/delegate-task-concurrency-diagnosis.md:1-99 — Fully read during supporting-resource closure. Diagnosis depends on unavailable delegate_task, Hermes delegation configuration, tools.delegate_tool._get_max_concurrent_children(), run_agent.py truncation, and Hermes logs. execute_code is also proposed as a workaround and is not an available tool here.",
+        "skills/autonomous-ai-agents/hermes-agent/references/desktop-plugins.md:1-245 — Fully read during supporting-resource closure. Plain ESM plugin files require the Hermes Electron desktop loader and its injected @hermes/plugin-sdk, react, and react/jsx-runtime imports; installing ordinary React alone does not supply the host.",
+        "skills/autonomous-ai-agents/hermes-agent/references/native-mcp.md:1-343 — Fully read during supporting-resource closure. The documented native integration requires Hermes startup discovery, its registry/toolsets, mcp_servers configuration, persistent asyncio connections, redaction, and sampling callbacks; those behaviors do not transfer merely by renaming tools.",
+        "skills/autonomous-ai-agents/hermes-agent/references/petdex.md:1-75 — Fully read during supporting-resource closure. Every operational workflow invokes hermes pets and writes Hermes display.pet settings or profile-scoped HERMES_HOME/pets assets; activity-linked rendering requires Hermes CLI/TUI/desktop.",
+        "skills/autonomous-ai-agents/hermes-agent/references/portal-auth-for-third-party-apps.md:1-128 — Fully read during supporting-resource closure. Direct external-app inference is architecturally portable through https://inference-api.nousresearch.com/v1 with independently obtained bearer credentials and network access; Hermes plugin authentication inheritance is not portable.",
+        "skills/autonomous-ai-agents/hermes-agent/references/project-context-files.md:1-48 — Fully read during supporting-resource closure. Hermes-specific discovery includes first-match selection, parent-to-git-root .hermes.md traversal, cwd-only AGENTS.md/CLAUDE.md/Cursor rules, and independent HERMES_HOME/SOUL.md loading.",
+        "skills/autonomous-ai-agents/hermes-agent/references/providers-and-models.md:1-74 — Fully read during supporting-resource closure. Hermes model/setup/auth/fallback commands, plugins/model-providers, hermes_cli/model_switch.py::resolve_alias(), and /model persistence depend on Hermes runtime.",
+        "skills/autonomous-ai-agents/hermes-agent/references/security-privacy.md:1-67 — Fully read during supporting-resource closure. Secret redaction, gateway PII filtering, auxiliary-LLM shell approvals, YOLO flags, /reset, and hermes tools toggles are Hermes runtime controls, not Pi security controls.",
+        "skills/autonomous-ai-agents/hermes-agent/references/slash-commands.md:1-112 — Fully read during supporting-resource closure. Commands derive from Hermes COMMAND_REGISTRY in hermes_cli/commands.py and depend on its CLI/TUI or messaging gateway dispatch; matching slash-command names cannot be assumed to have matching Pi semantics.",
+        "skills/autonomous-ai-agents/hermes-agent/references/themes.md:1-127 — Fully read during supporting-resource closure. read_file/search_files/write_file/terminal vocabulary maps to Pi file operations and Bash, but activation and single-key edits invoke hermes config/skin commands.",
+        "skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md:1-81 — Fully read during supporting-resource closure. Diagnostics require Hermes CLI/auth/plugins, .env/config.yaml, gateway processes and auxiliary-provider configuration. Voice setup imports pm and calls pm.sync_venv for stt-whisper; it is not a generic Python-only recipe.",
+        "skills/autonomous-ai-agents/hermes-agent/references/tui-widgets.md:1-137 — Fully read during supporting-resource closure. Plain ESM widgets require the Hermes Ink TUI loader, injected SDK, widget registry, theme tones and hot-reload/slash-command machinery; writing an .mjs file in Pi cannot supply these.",
+        "skills/autonomous-ai-agents/hermes-agent/references/webhooks.md:1-216 — Fully read during supporting-resource closure. Subscriptions require hermes webhook, an enabled running gateway HTTP adapter, HMAC secrets and persistent webhook_subscriptions.json. Pi Bash does not replace the listener, route reload, agent triggering or messaging delivery adapters.",
+        "skills/autonomous-ai-agents/hermes-agent/references/windows-quirks.md:1-65 — Fully read during supporting-resource closure. Keybindings depend on Windows terminal interception and Hermes prompt_toolkit bindings; the diagnostic command assumes Python and scripts/keystroke_diagnostic.py in a Hermes checkout.",
+        "skills/autonomous-ai-agents/hermes-agent/templates/clock.mjs:1-51 — Fully read during supporting-resource closure. No imports, subprocesses, filesystem operations or external API calls occur in the template. React, Box/Dialog/Text, h and defineWidgetApp are injected by the Hermes widget host.",
+        "skills/autonomous-ai-agents/hermes-agent/templates/plugin.js:1-97 — Fully read during supporting-resource closure. Imports @hermes/plugin-sdk and react/jsx-runtime through the desktop host's restricted ESM resolver. Depends on host.state.gateway, useValue, host.notify, haptic, Tip, localization registration and pane/status-bar extension areas.",
+        "skills/autonomous-ai-agents/hermes-agent/templates/skin.yaml:1-49 — Fully read during supporting-resource closure. Static YAML contains semantic palette, branding and tool-prefix data; no imports, subprocesses or external resources. Its schema, defaults and CLI/TUI/desktop rendering are Hermes-specific."
       ],
       "platforms": [
         "darwin",
@@ -8399,13 +8599,31 @@
       "dependencies": [],
       "reviewedFiles": [
         "skills/autonomous-ai-agents/hermes-agent/SKILL.md",
-        "skills/autonomous-ai-agents/hermes-agent/references/configuration.md",
         "skills/autonomous-ai-agents/hermes-agent/references/background-systems.md",
-        "skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md"
+        "skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/configuration.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/contributor-guide.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/delegate-task-concurrency-diagnosis.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/desktop-plugins.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/native-mcp.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/petdex.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/portal-auth-for-third-party-apps.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/project-context-files.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/providers-and-models.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/security-privacy.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/slash-commands.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/themes.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/tui-widgets.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/webhooks.md",
+        "skills/autonomous-ai-agents/hermes-agent/references/windows-quirks.md",
+        "skills/autonomous-ai-agents/hermes-agent/templates/clock.mjs",
+        "skills/autonomous-ai-agents/hermes-agent/templates/plugin.js",
+        "skills/autonomous-ai-agents/hermes-agent/templates/skin.yaml"
       ],
       "limitations": [
-        "Remaining feature-specific references and skin/plugin/widget templates were inventoried but not read; they are not needed to establish the hub's mandatory Hermes dependency.",
-        "Official online docs were not fetched and no Hermes command was executed."
+        "Official online docs were not fetched and no Hermes command was executed.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated."
       ],
       "resourceFiles": [
         "SKILL.md",
@@ -9884,20 +10102,24 @@
       "category": "productivity",
       "origin": "built-in",
       "digest": "sha256:2c2f9a7578cc4b318b980206c025aa970eb9688fbffca89dc3f752acaa9e6d02",
-      "decision": "blocked",
-      "reason": "The bundled document CLIs are standalone, but the complete skill still prescribes Hermes PM provisioning on PowerShell and mandatory vision_analyze review when slide rendering tools exist. Those branches have no documented file/bash-only substitute; fail closed for the full advertised workflow.",
+      "decision": "portable",
+      "reason": "All bundled document helpers, references, and tests establish standalone Python execution. On POSIX hosts the documented preinstalled-library and home-cache venv routes avoid Hermes PM. Pi image reads supply rendered-slide inspection. Native Windows remains unsupported because its prescribed PowerShell setup invokes Hermes PM and recalculation assumes a POSIX PATH.",
       "evidence": [
         "skills/productivity/microsoft-office/SKILL.md:40-86 — exact interpreter-preparation block has a standalone POSIX fallback, but PowerShell explicitly invokes hermes pm environment.",
         "skills/productivity/microsoft-office/SKILL.md:151-162 — mandatory PowerPoint PNG checks with vision_analyze when render tools exist.",
         "skills/productivity/microsoft-office/references/powerpoint.md:128-141 — visual verification explicitly uses vision_analyze; outline fallback is documented only for missing render tools.",
         "skills/productivity/microsoft-office/scripts/pptx_render.py:24-68 — subprocesses are soffice and pdftoppm/pdftocairo, with no Hermes imports.",
         "skills/productivity/microsoft-office/scripts/xlsx_recalc.py:53-105 — standalone soffice subprocess and cached-value counting; subprocess environment uses POSIX-style PATH.",
-        "skills/productivity/microsoft-office/scripts/docx_common.py:1-96 — document helpers resolve locally within scripts and use no Hermes state."
+        "skills/productivity/microsoft-office/scripts/docx_common.py:1-96 — document helpers resolve locally within scripts and use no Hermes state.",
+        "skills/productivity/microsoft-office/LICENSE:1-21 — Fully read during supporting-resource closure. MIT, copyright 2026 Nous Research; preserve notice. No runtime dependency.",
+        "skills/productivity/microsoft-office/tests/test_docx_skill.py:1-544 — Fully read during supporting-resource closure. Standalone pytest suite imports python-docx and lazily lxml; standard-library code generates PNG, JSON, ZIP and XML fixtures in pytest temporary directories. No network fixtures or Hermes imports.",
+        "skills/productivity/microsoft-office/tests/test_powerpoint_skill.py:1-497 — Fully read during supporting-resource closure. Standalone pytest uses sibling pptx_create/read/edit/from_template/render CLIs through sys.executable, explicit UTF-8 subprocess I/O, and temporary generated PNG/JSON/PPTX fixtures. Direct assertions import python-pptx; production pptx_edit also imports lxml. example.com hyperlinks are stored document data, not fetched.",
+        "skills/productivity/microsoft-office/tests/test_xlsx_skill.py:1-590 — Fully read during supporting-resource closure. Requires pytest and openpyxl; invokes sibling xlsx_create/read/edit/restructure/recalc and csv conversion scripts using sys.executable and absolute paths. Fixtures and in-place workbook modifications remain under pytest temporary directories.",
+        "skills/productivity/microsoft-office/SKILL.md:40-86,151-162 — Full reread confirms an existing Python environment or explicit standalone POSIX venv fallback and PNG-based slide verification; Pi can inspect those PNGs directly."
       ],
       "platforms": [
         "darwin",
-        "linux",
-        "win32"
+        "linux"
       ],
       "prerequisites": [
         "Python 3.11+ for the full helper set's datetime.UTC usage",
@@ -9908,18 +10130,18 @@
         "Conditional bootstrap also installs reportlab==5.1.0, pypdf==6.21.2, pdfplumber==0.11.10, pypdfium2==5.14.0",
         "Optional LibreOffice/soffice",
         "Optional poppler pdftoppm or pdftocairo",
-        "vision_analyze for prescribed rendered-slide review",
-        "Hermes PM for the documented PowerShell setup route",
+        "Image-capable Pi model and image-reading support for rendered-slide review",
         "Optional pytest for bundled tests"
       ],
       "dependencies": [],
       "reviewedFiles": [
+        "skills/productivity/microsoft-office/LICENSE",
         "skills/productivity/microsoft-office/SKILL.md",
-        "skills/productivity/microsoft-office/references/word.md",
-        "skills/productivity/microsoft-office/references/powerpoint.md",
         "skills/productivity/microsoft-office/references/excel.md",
+        "skills/productivity/microsoft-office/references/powerpoint.md",
         "skills/productivity/microsoft-office/references/restructuring.md",
         "skills/productivity/microsoft-office/references/revisions-and-comments.md",
+        "skills/productivity/microsoft-office/references/word.md",
         "skills/productivity/microsoft-office/scripts/csv_to_xlsx.py",
         "skills/productivity/microsoft-office/scripts/docx_comments.py",
         "skills/productivity/microsoft-office/scripts/docx_common.py",
@@ -9939,12 +10161,15 @@
         "skills/productivity/microsoft-office/scripts/xlsx_read.py",
         "skills/productivity/microsoft-office/scripts/xlsx_recalc.py",
         "skills/productivity/microsoft-office/scripts/xlsx_restructure.py",
-        "skills/productivity/microsoft-office/scripts/xlsx_to_csv.py"
+        "skills/productivity/microsoft-office/scripts/xlsx_to_csv.py",
+        "skills/productivity/microsoft-office/tests/test_docx_skill.py",
+        "skills/productivity/microsoft-office/tests/test_powerpoint_skill.py",
+        "skills/productivity/microsoft-office/tests/test_xlsx_skill.py"
       ],
       "limitations": [
-        "Core document creation/read/edit operations are portable subsets when libraries are already installed.",
-        "All bundled runtime scripts and format references were read; bundled tests and LICENSE were inventoried but not read or executed.",
-        "Native Windows LibreOffice recalculation compatibility is unresolved because the helper replaces the environment with a POSIX-style PATH."
+        "Native Windows LibreOffice recalculation compatibility is unresolved because the helper replaces the environment with a POSIX-style PATH.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated.",
+        "Some bundled tests consume files established by earlier tests/fixtures without directly requesting that setup; isolated selections may not be self-contained."
       ],
       "resourceFiles": [
         "LICENSE",
@@ -9987,14 +10212,16 @@
       "origin": "built-in",
       "digest": "sha256:3e0ffcfc63344d86318bc47b78207972f08414b361be6283af854588bbaebf77",
       "decision": "blocked",
-      "reason": "Bundled PDF helpers are standalone, and preinstalled libraries avoid Hermes provisioning. However, the full workflow mandates dedicated vision_analyze verification for visual outputs and web_extract-first processing for remote PDFs. Those capabilities are not guaranteed by the file/bash-only scope, and no equivalent neutral verification path is prescribed.",
+      "reason": "The bundled PDF helpers and preinstalled-library/POSIX bootstrap routes are standalone, and Pi image reads supply local visual verification. The full advertised OCR workflow nevertheless mandates web_extract-first handling of remote PDFs with Firecrawl behavior, which Pi's native file/bash tools do not supply. No standalone replacement for that required branch is documented.",
       "evidence": [
         "skills/productivity/pdf/SKILL.md:32-76 — existing libraries can bypass Hermes pm; rasterization uses pypdfium2 or pdftoppm.",
         "skills/productivity/pdf/SKILL.md:154-164 — forms and visual outputs require vision_analyze review.",
         "skills/productivity/pdf/references/ocr-extraction.md:14-26 — remote documents must first use web_extract, with Firecrawl conversion assumed.",
         "skills/productivity/pdf/scripts/_raster.py:1-79 — complete local rasterizer closure; only subprocess is external pdftoppm.",
         "skills/productivity/pdf/scripts/pdf_form_layout.py:108-145 — local overlay generation imports bundled _raster and Pillow.",
-        "skills/productivity/pdf/references/nano-pdf-editing.md:37-40 — optional nano-pdf branch needs an unspecified LLM API key/configuration."
+        "skills/productivity/pdf/references/nano-pdf-editing.md:37-40 — optional nano-pdf branch needs an unspecified LLM API key/configuration.",
+        "skills/productivity/pdf/LICENSE:1-21 — Fully read during supporting-resource closure. MIT, copyright 2026 Nous Research; preserve notice. No runtime dependency.",
+        "skills/productivity/pdf/tests/test_pdf_skill.py:1-448 — Fully read during supporting-resource closure. Standalone pytest creates all PDF, form, image, JSON, CSV and attachment fixtures locally. Requires Pillow directly for sample images, reportlab for form/stamp fixtures, and pypdf for structural assertions; helper operations additionally require pdfplumber. All subprocesses use sys.executable, sibling absolute paths and explicit UTF-8 I/O."
       ],
       "platforms": [
         "darwin",
@@ -10019,32 +10246,34 @@
         "microsoft-office"
       ],
       "reviewedFiles": [
+        "skills/productivity/pdf/LICENSE",
         "skills/productivity/pdf/SKILL.md",
         "skills/productivity/pdf/references/forms.md",
-        "skills/productivity/pdf/references/ocr-extraction.md",
         "skills/productivity/pdf/references/nano-pdf-editing.md",
-        "skills/productivity/pdf/scripts/pdf_create.py",
-        "skills/productivity/pdf/scripts/pdf_make_form.py",
-        "skills/productivity/pdf/scripts/pdf_form_layout.py",
-        "skills/productivity/pdf/scripts/pdf_read.py",
-        "skills/productivity/pdf/scripts/pdf_merge.py",
-        "skills/productivity/pdf/scripts/pdf_split.py",
-        "skills/productivity/pdf/scripts/pdf_fill_form.py",
-        "skills/productivity/pdf/scripts/pdf_secure.py",
-        "skills/productivity/pdf/scripts/pdf_watermark.py",
-        "skills/productivity/pdf/scripts/pdf_stamp.py",
-        "skills/productivity/pdf/scripts/pdf_page_image.py",
-        "skills/productivity/pdf/scripts/pdf_meta.py",
+        "skills/productivity/pdf/references/ocr-extraction.md",
         "skills/productivity/pdf/scripts/_raster.py",
+        "skills/productivity/pdf/scripts/extract_marker.py",
         "skills/productivity/pdf/scripts/extract_pymupdf.py",
-        "skills/productivity/pdf/scripts/extract_marker.py"
+        "skills/productivity/pdf/scripts/pdf_create.py",
+        "skills/productivity/pdf/scripts/pdf_fill_form.py",
+        "skills/productivity/pdf/scripts/pdf_form_layout.py",
+        "skills/productivity/pdf/scripts/pdf_make_form.py",
+        "skills/productivity/pdf/scripts/pdf_merge.py",
+        "skills/productivity/pdf/scripts/pdf_meta.py",
+        "skills/productivity/pdf/scripts/pdf_page_image.py",
+        "skills/productivity/pdf/scripts/pdf_read.py",
+        "skills/productivity/pdf/scripts/pdf_secure.py",
+        "skills/productivity/pdf/scripts/pdf_split.py",
+        "skills/productivity/pdf/scripts/pdf_stamp.py",
+        "skills/productivity/pdf/scripts/pdf_watermark.py",
+        "skills/productivity/pdf/tests/test_pdf_skill.py"
       ],
       "limitations": [
         "microsoft-office is a conditional linked dependency for DOCX/PPTX handling, not required for ordinary PDF operations.",
-        "A Pi image-capable file reader could potentially cover local visual inspection, but that equivalence is not assumed for this audit's guaranteed capabilities.",
         "nano-pdf provider/configuration is unspecified; marker models and third-party packages were not inspected or downloaded.",
-        "Bundled tests were not read or executed.",
-        "Core local nonvisual PDF operations are separable from the blocked full workflow."
+        "Core local nonvisual PDF operations are separable from the blocked full workflow.",
+        "All bundled resource files were statically reviewed; upstream scripts, tests, browsers, installers, services, and external packages were not executed or dynamically validated.",
+        "Some bundled tests consume files established by earlier tests/fixtures without directly requesting that setup; isolated selections may not be self-contained."
       ],
       "resourceFiles": [
         "LICENSE",
