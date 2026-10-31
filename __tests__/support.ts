@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { ExtensionAPI, ExtensionCommandContext, ExtensionUIContext, MessageRenderer, RegisteredCommand, Theme } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext, ExtensionUIContext, KeybindingsManager as AppKeybindingsManager, MessageRenderer, RegisteredCommand, Theme } from "@earendil-works/pi-coding-agent";
 import { type Component, type Focusable, KeybindingsManager, TUI_KEYBINDINGS, type TUI } from "@earendil-works/pi-tui";
 import { vi } from "vitest";
 import extension from "../src/index.js";
@@ -26,7 +26,7 @@ export function createHarness() {
     setEditorText,
     getEditorText: () => "Draft that must not be replaced",
     custom: vi.fn(<T>(factory: Parameters<ExtensionUIContext["custom"]>[0]) => new Promise<T>((resolve, reject) => {
-      Promise.resolve(factory({ terminal, requestRender } as unknown as TUI, plainTheme, keybindings as never, resolve as (value: unknown) => void))
+      Promise.resolve(factory({ terminal, requestRender } as unknown as TUI, plainTheme, keybindings as unknown as AppKeybindingsManager, resolve as (value: unknown) => void))
         .then((value) => { component = value; if ("focused" in value) value.focused = true; })
         .catch(reject);
     })),
@@ -51,6 +51,7 @@ export function createHarness() {
     writeFileSync(path, `---\nname: ${name}\ndescription: ${JSON.stringify(description)}\n---\n${body}`);
     return path;
   }
+  const mountedComponent = () => component;
   return {
     agentDir, ctx, ui, keybindings, terminal, sendMessage, sendUserMessage, notify, setEditorText, registerCommand, registerMessageRenderer,
     writeSkill,
@@ -60,8 +61,9 @@ export function createHarness() {
       component = undefined;
       const completion = this.run(query);
       await vi.waitFor(() => { if (!component) throw new Error("Picker not opened"); });
-      if (!component) throw new Error("Picker not opened");
-      return { component, completion };
+      const mounted = mountedComponent();
+      if (!mounted) throw new Error("Picker not opened");
+      return { component: mounted, completion };
     },
     renderMessage() {
       if (!renderer) throw new Error("Renderer not registered");

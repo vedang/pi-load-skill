@@ -44,7 +44,11 @@ accepted.
 ```
 
 The argument seeds search; it never bypasses confirmation. Choose a skill and
-press Enter to load it. Escape cancels without changing model context. The picker
+press Enter to load it. Escape cancels without changing model context. Search is
+live and fuzzy over skill name, description, and directory name. Up/down moves
+through a bounded results list; the selected source path and description appear
+below it. Page Up/Page Down scroll long previews. Pi's configured selection
+keybindings are respected and shown in the picker help. The picker
 uses Pi's temporary custom UI, preserving the editor draft present when it opens.
 Only interactive TUI mode with UI available is supported, and the agent must be
 idle. RPC receives an unsupported-mode notification; without UI, Pi receives a
@@ -101,6 +105,9 @@ make test
 ```
 
 The suites are deterministic and need no model credentials or network requests.
-If pnpm asks about dependency build scripts, review them explicitly; this
-extension does not approve scripts on your behalf. Never bypass a harness block
+The project explicitly denies the inspected `@google/genai` no-op preinstall
+and `protobufjs` version-warning postinstall scripts in `pnpm-workspace.yaml`;
+neither builds runtime artifacts needed here. If pnpm asks about new dependency
+build scripts, review them explicitly; this extension does not approve scripts
+on your behalf. Never bypass a harness block
 with a different package manager or lower-level executable.

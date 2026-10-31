@@ -45,7 +45,7 @@ describe("private catalog configuration and native discovery", () => {
     expect(catalog.skills).toHaveLength(2);
     expect(catalog.skills.map((entry) => entry.name)).toEqual(["shared", "shared"]);
     // Native ordering may choose the alias, but neither distinct file is lost.
-    expect(new Set(catalog.skills.map((entry) => entry.baseDir))).toHaveLength(2);
+    expect(new Set(catalog.skills.map((entry) => entry.baseDir)).size).toBe(2);
     expect(catalog.skills.some((entry) => entry.filePath === second)).toBe(true);
     expect(catalog.skills.some((entry) => entry.filePath === first || entry.filePath === join(root, "alias", "SKILL.md"))).toBe(true);
   });
