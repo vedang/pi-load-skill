@@ -1,7 +1,7 @@
 # bv (beads viewer) local config and caches
 .bv/
 .agents/plans/
-node_modules/
+node_modules
 dist/
 coverage/
 

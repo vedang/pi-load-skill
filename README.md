@@ -75,8 +75,11 @@ of this loader.
 /load-skill stripe
 ```
 
-The argument seeds search; it never bypasses confirmation. Choose a skill and
-press Enter to load it. Escape cancels without changing model context. Search is
+The argument seeds search; it never bypasses confirmation. **Tab** toggles the
+highlighted skill; **Space** remains search text. Enter loads only checked skills;
+with zero checked entries it does nothing. Checks persist across filtering and
+scrolling; the header reports total and hidden checks. Each invocation starts
+unchecked. Escape cancels without changing model context. Search is
 live and fuzzy over skill name, description, and directory name. Up/down moves
 through a bounded results list; the selected source path and description appear
 below it. Page Up/Page Down scroll long previews. Pi's configured selection
@@ -87,9 +90,9 @@ idle. RPC receives an unsupported-mode notification; without UI, Pi receives a
 command error through the host (stderr in Pi 0.84.2 print/JSON modes), not arbitrary
 stdout or a conversation message.
 
-Loading adds one custom context message and a compact `Loaded skill: …` transcript
+Loading adds one batch context message and a compact `Loaded N skills: …` transcript
 entry. It does **not** start a model turn. Write your next prompt to apply it.
-Only the selected instructions, name, file location, and reference directory are
+Only the checked instructions, names, file locations, and reference directories are
 included. Native revalidation and a fresh body read happen at confirmation, so a
 deleted or natively rejected skill is not partially loaded. Refreshed native
 metadata is used if it changed. This is best-effort edit detection, not an atomic

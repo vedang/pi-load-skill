@@ -24,10 +24,11 @@ describe("native search interaction", () => {
       const { component, completion } = await h.open(query);
       expect(component.render(80).join("\n")).toContain(name);
       expect(h.sendMessage).not.toHaveBeenCalled();
+      component.handleInput?.("\t");
       component.handleInput?.("\r");
       await completion;
       expect(h.sendMessage).toHaveBeenCalledOnce();
-      expect(h.sendMessage.mock.calls[0][0].details.name).toBe(name);
+      expect(h.sendMessage.mock.calls[0][0].details.skills[0].name).toBe(name);
     },
   );
 
@@ -35,12 +36,14 @@ describe("native search interaction", () => {
     h.writeSkill("stripe", "stripe");
     const { component, completion } = await h.open("zzzzzz");
     expect(component.render(80).join("\n")).toContain("No matches");
+    component.handleInput?.("\t");
     component.handleInput?.("\r");
     expect(h.sendMessage).not.toHaveBeenCalled();
     component.handleInput?.("\x15"); // Native Input: delete to line start.
     component.handleInput?.("\x1b[200~stripe\x1b[201~");
     expect(component.render(80).join("\n")).toContain("Load skill · 1/1");
     expect(h.sendMessage).not.toHaveBeenCalled();
+    component.handleInput?.("\t");
     component.handleInput?.("\r");
     await completion;
     expect(h.sendMessage).toHaveBeenCalledOnce();
@@ -60,6 +63,7 @@ describe("native search interaction", () => {
     const rendered = component.render(200).join("\n");
     expect(rendered).toContain(second);
     expect(rendered).toContain("ctrl+l");
+    component.handleInput?.("\t");
     component.handleInput?.("\x0c");
     await completion;
     expect(h.sendMessage.mock.calls[0][0].content).toContain("Second body.");

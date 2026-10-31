@@ -3,6 +3,8 @@ import type { ExtensionContext, Skill } from "@earendil-works/pi-coding-agent";
 import {
   fuzzyFilter,
   Input,
+  Key,
+  matchesKey,
   SelectList,
   stripTerminalSequences,
   truncateToWidth,
@@ -13,8 +15,8 @@ export function showSkillPicker(
   ctx: ExtensionContext,
   skills: Skill[],
   query: string,
-): Promise<Skill | undefined> {
-  return ctx.ui.custom<Skill | undefined>((tui, theme, keybindings, done) => {
+): Promise<Skill[] | undefined> {
+  return ctx.ui.custom<Skill[] | undefined>((tui, theme, keybindings, done) => {
     const input = new Input();
     // Native text insertion leaves the caret after the seeded query. setValue()
     // preserves the initial caret at zero, making delete-to-start a no-op.
@@ -23,6 +25,7 @@ export function showSkillPicker(
       (a, b) =>
         a.name.localeCompare(b.name) || a.filePath.localeCompare(b.filePath),
     );
+    const checked = new Set<string>();
     let matches: Skill[] = [];
     let list: SelectList;
     let listHeight = 6;
@@ -34,7 +37,7 @@ export function showSkillPicker(
       stripTerminalSequences(text).replaceAll("\r", "");
     const selected = () =>
       matches.find((skill) => skill.filePath === list.getSelectedItem()?.value);
-    const finish = (skill: Skill | undefined) => {
+    const finish = (skill: Skill[] | undefined) => {
       if (closed) return;
       closed = true;
       done(skill);
@@ -46,7 +49,7 @@ export function showSkillPicker(
       list = new SelectList(
         matches.map((skill) => ({
           value: skill.filePath,
-          label: clean(skill.name),
+          label: `${checked.has(skill.filePath) ? "[x]" : "[ ]"} ${clean(skill.name)}`,
           description: clean(skill.description),
         })),
         listHeight,
@@ -91,7 +94,7 @@ export function showSkillPicker(
         if (width < 1) return [];
         const height = Math.max(1, Math.min(24, tui.terminal.rows - 5));
         const help = wrapTextWithAnsi(
-          `${keys("tui.select.up")}/${keys("tui.select.down")} navigate · ${keys("tui.select.confirm")} load · ${keys("tui.select.cancel")} cancel`,
+          `${keys("tui.select.up")}/${keys("tui.select.down")} navigate · Tab toggle · ${keys("tui.select.confirm")} load checked · ${keys("tui.select.cancel")} cancel`,
           width,
         );
         // Keep input usable even on an unusually short terminal. On normal
@@ -155,7 +158,9 @@ export function showSkillPicker(
         return [
           theme.fg(
             "accent",
-            theme.bold(`Load skill · ${matches.length}/${skills.length}`),
+            theme.bold(
+              `Load skill · ${matches.length}/${skills.length} · ${checked.size} checked (${[...checked].filter((path) => !matches.some((skill) => skill.filePath === path)).length} hidden)`,
+            ),
           ),
           ...input.render(Math.max(4, width)),
           ...resultLines,
@@ -171,11 +176,18 @@ export function showSkillPicker(
           return;
         }
         if (keybindings.matches(data, "tui.select.confirm")) {
-          const skill = selected();
-          if (skill) finish(skill);
+          if (checked.size)
+            finish(ordered.filter((skill) => checked.has(skill.filePath)));
           return;
         }
-        if (
+        if (matchesKey(data, Key.tab)) {
+          const skill = selected();
+          if (skill) {
+            if (checked.has(skill.filePath)) checked.delete(skill.filePath);
+            else checked.add(skill.filePath);
+            rebuildList(true);
+          }
+        } else if (
           keybindings.matches(data, "tui.select.up") ||
           keybindings.matches(data, "tui.select.down")
         ) {

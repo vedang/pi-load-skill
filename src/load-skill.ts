@@ -7,7 +7,20 @@ import {
 } from "@earendil-works/pi-coding-agent";
 
 /** Synchronous so the caller can recheck idle and deliver without yielding. */
-export function prepareSkillMessage(selected: Skill) {
+export function prepareSkillMessage(selected: Skill[]) {
+  const prepared = selected.map(prepareOne);
+  return {
+    message: {
+      customType: "pi-load-skill",
+      content: prepared.map((item) => item.content).join("\n\n"),
+      display: true,
+      details: { skills: prepared.map((item) => item.details) },
+    },
+    diagnostics: prepared.flatMap((item) => item.diagnostics),
+  };
+}
+
+function prepareOne(selected: Skill) {
   if (basename(selected.filePath) !== "SKILL.md") {
     throw new Error("Only SKILL.md entries can be loaded.");
   }
@@ -28,12 +41,8 @@ export function prepareSkillMessage(selected: Skill) {
   }
   const body = stripFrontmatter(readFileSync(skill.filePath, "utf8"));
   return {
-    message: {
-      customType: "pi-load-skill",
-      content: `<skill name="${escapeAttribute(skill.name)}" location="${escapeAttribute(skill.filePath)}">\nReferences are relative to ${skill.baseDir}.\n\n${body}\n</skill>`,
-      display: true,
-      details: { name: skill.name, filePath: skill.filePath },
-    },
+    content: `<skill name="${escapeAttribute(skill.name)}" location="${escapeAttribute(skill.filePath)}">\nReferences are relative to ${skill.baseDir}.\n\n${body}\n</skill>`,
+    details: { name: skill.name, filePath: skill.filePath, origin: "Personal" },
     diagnostics: result.diagnostics.map(
       (item) => `${item.path}: ${item.message}`,
     ),

@@ -2,31 +2,46 @@ import {
   type ExtensionAPI,
   getAgentDir,
 } from "@earendil-works/pi-coding-agent";
-import { Text } from "@earendil-works/pi-tui";
+import {
+  stripTerminalSequences,
+  Text,
+  truncateToWidth,
+} from "@earendil-works/pi-tui";
 import { readCatalog } from "./catalog.js";
 import { prepareSkillMessage } from "./load-skill.js";
 import { showSkillPicker } from "./picker.js";
 
 export default function loadSkillExtension(pi: ExtensionAPI): void {
   // No settings reads, discovery, lifecycle hooks, or model-callable surface.
-  pi.registerMessageRenderer<{ name: string; filePath: string }>(
-    "pi-load-skill",
-    (message, options, theme) => {
-      const name = message.details?.name ?? "skill";
-      const path =
-        options.expanded && message.details?.filePath
-          ? `\n${theme.fg("dim", message.details.filePath)}`
-          : "";
-      return new Text(
-        `${theme.fg("success", `Loaded skill: ${name}`)}${path}`,
-        options.outputPad,
-        0,
-      );
-    },
-  );
+  pi.registerMessageRenderer<{
+    skills: { name: string; filePath: string; origin: string }[];
+  }>("pi-load-skill", (message, options, theme) => {
+    const skills = message.details?.skills ?? [];
+    const clean = (text: string) =>
+      stripTerminalSequences(text).replaceAll("\r", "");
+    const name = truncateToWidth(
+      clean(
+        `Loaded ${skills.length} skills: ${skills.map((skill) => skill.name).join(", ")}`,
+      ),
+      120,
+    );
+    const path = options.expanded
+      ? skills
+          .map(
+            (skill) =>
+              `\n${theme.fg("dim", clean(`${skill.origin}: ${skill.filePath}`))}`,
+          )
+          .join("")
+      : "";
+    return new Text(
+      `${theme.fg("success", name)}${path}`,
+      options.outputPad,
+      0,
+    );
+  });
   pi.registerCommand("load-skill", {
     description:
-      "Search local skills and explicitly load one for the next prompt",
+      "Search skills and explicitly load checked instructions for the next prompt",
     handler: async (args, ctx) => {
       if (ctx.mode !== "tui" || !ctx.hasUI) {
         const message =

@@ -95,6 +95,7 @@ describe("manual command boundary", () => {
         path,
         "---\nname: stripe-updated\ndescription: Updated metadata\n---\nUse references/guide.md and scripts/run.sh.",
       );
+      component.handleInput?.("\t");
       component.handleInput?.("\r");
       await completion;
       expect(h.sendMessage).toHaveBeenCalledExactlyOnceWith(
@@ -102,11 +103,15 @@ describe("manual command boundary", () => {
           customType: "pi-load-skill",
           content: `<skill name="stripe-updated" location="${path}">\nReferences are relative to ${path.slice(0, -"/SKILL.md".length)}.\n\nUse references/guide.md and scripts/run.sh.\n</skill>`,
           display: true,
-          details: { name: "stripe-updated", filePath: path },
+          details: {
+            skills: [
+              { name: "stripe-updated", filePath: path, origin: "Personal" },
+            ],
+          },
         },
         { triggerTurn: false },
       );
-      expect(h.renderMessage()).toContain("Loaded skill: stripe-updated");
+      expect(h.renderMessage()).toContain("Loaded 1 skills: stripe-updated");
       expect(h.renderMessage()).not.toContain("Use references");
       expect(h.sendUserMessage).not.toHaveBeenCalled();
       expect(h.setEditorText).not.toHaveBeenCalled();
@@ -123,6 +128,7 @@ describe("manual command boundary", () => {
       else if (failure === "missing-description")
         writeFileSync(path, "---\nname: stripe\n---\nMust not load.");
       else writeFileSync(path, "---\nname: [broken\n---\nMust not load.");
+      component.handleInput?.("\t");
       component.handleInput?.("\r");
       await completion;
       expect(h.sendMessage).not.toHaveBeenCalled();
@@ -146,11 +152,45 @@ describe("manual command boundary", () => {
     );
   });
 
+  it.each([false, true])(
+    "preserves hidden checks, orders the batch, and appends nothing if any file fails (%s)",
+    async (deleteFirst) => {
+      h.configure();
+      const first = h.writeSkill("a", "alpha", "ALPHA BODY");
+      h.writeSkill("b", "beta", "BETA BODY");
+      const { component, completion } = await h.open();
+      component.handleInput?.("\r"); // zero checks is a no-op, even with a highlight
+      expect(h.sendMessage).not.toHaveBeenCalled();
+      component.handleInput?.("\x1b[B");
+      component.handleInput?.("\t");
+      component.handleInput?.("alpha");
+      expect(component.render(160).join("\n")).toContain(
+        "1 checked (1 hidden)",
+      );
+      component.handleInput?.("\t");
+      if (deleteFirst) rmSync(first);
+      component.handleInput?.("\r");
+      await completion;
+      if (deleteFirst) expect(h.sendMessage).not.toHaveBeenCalled();
+      else {
+        expect(h.sendMessage).toHaveBeenCalledOnce();
+        const [message, options] = h.sendMessage.mock.calls[0];
+        expect(
+          message.details.skills.map((skill: { name: string }) => skill.name),
+        ).toEqual(["alpha", "beta"]);
+        expect(message.content).toContain("ALPHA BODY");
+        expect(message.content).toContain("BETA BODY");
+        expect(options).toEqual({ triggerTurn: false });
+      }
+    },
+  );
+
   it("rechecks idle after the picker interaction", async () => {
     h.configure();
     h.writeSkill("stripe", "stripe");
     const { component, completion } = await h.open("stripe");
     vi.mocked(h.ctx.isIdle).mockReturnValue(false);
+    component.handleInput?.("\t");
     component.handleInput?.("\r");
     await completion;
     expect(h.sendMessage).not.toHaveBeenCalled();
