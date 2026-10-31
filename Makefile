@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -Eeuo pipefail -c
 .DEFAULT_GOAL := help
-BIOME_SCOPE := package.json biome.json knip.json tsconfig.json $(wildcard vitest.config.*.ts) $(wildcard src) $(wildcard __tests__)
+BIOME_SCOPE := package.json biome.json knip.json tsconfig.json $(wildcard vitest.config.*.ts) $(wildcard src) $(wildcard __tests__) $(wildcard scripts)
 
 .PHONY: help format check check-biome check-typescript check-knip test test-unit test-integration
 help: ## Show quality gates

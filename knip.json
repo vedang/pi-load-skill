@@ -2,11 +2,17 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
     "src/index.ts",
+    "scripts/*.mjs",
     "vitest.config.*.ts",
     "__tests__/**/*.test.ts",
     "__tests__/fixtures/registration-probe.ts"
   ],
-  "project": ["src/**/*.ts", "__tests__/**/*.ts", "vitest.config.*.ts"],
+  "project": [
+    "src/**/*.ts",
+    "scripts/*.mjs",
+    "__tests__/**/*.ts",
+    "vitest.config.*.ts"
+  ],
   "ignoreDependencies": ["@biomejs/biome"],
   "ignoreBinaries": ["make"]
 }
